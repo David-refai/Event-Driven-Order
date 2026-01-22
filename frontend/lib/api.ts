@@ -22,6 +22,7 @@ const getAuthHeaders = (): HeadersInit => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     return {
         'Content-Type': 'application/json',
+        'X-API-KEY': API_KEY,
         ...(token && { 'Authorization': `Bearer ${token}` }),
     };
 };
