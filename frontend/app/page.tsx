@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,10 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiClient, type Order, type EventStat } from '@/lib/api';
 import { SERVICES } from '@/lib/config';
+import { useAuth } from '@/contexts/AuthContext';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function Dashboard() {
+  const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<'orders' | 'analytics' | 'health'>('orders');
   const [orderIds, setOrderIds] = useState<string[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -19,6 +23,12 @@ export default function Dashboard() {
   });
   const [newOrder, setNewOrder] = useState({ customerId: 'CUST-001', totalAmount: 250 });
   const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   // SWR hooks for real-time data
   const { data: analytics } = useSWR<EventStat[]>(
@@ -61,12 +71,35 @@ export default function Dashboard() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="container mx-auto p-6">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">EventFlow</h1>
-          <p className="text-slate-300">Event-Driven Order Processing System</p>
+        <header className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">EventFlow</h1>
+            <p className="text-slate-300">Event-Driven Order Processing System</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="text-white text-sm">
+              <div className="font-semibold">{user?.username}</div>
+              <div className="text-slate-400 text-xs">{user?.roles.join(', ')}</div>
+            </div>
+            <Button variant="outline" onClick={logout}>
+              Logout
+            </Button>
+          </div>
         </header>
 
         <div className="flex gap-4 mb-6">

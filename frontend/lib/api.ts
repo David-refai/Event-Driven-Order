@@ -18,25 +18,40 @@ export interface HealthStatus {
     status: 'UP' | 'DOWN' | 'UNKNOWN';
 }
 
+const getAuthHeaders = (): HeadersInit => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    return {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+    };
+};
+
 export const apiClient = {
-    async createOrder(data: { customerId: string; totalAmount: number; currency: string; items: any[] }): Promise<{ orderId: string }> {
+    async createOrder(data: { customerId: string; totalAmount: number; currency: string; items: any[] }): Promise<Order> {
         const res = await fetch(`${API_BASE_URL}/api/orders`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-KEY': API_KEY,
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error('Failed to create order');
+        if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+                throw new Error('Unauthorized - Please login');
+            }
+            throw new Error('Failed to create order');
+        }
         return res.json();
     },
 
     async getOrder(orderId: string): Promise<Order> {
         const res = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
-            headers: { 'X-API-KEY': API_KEY },
+            headers: getAuthHeaders(),
         });
-        if (!res.ok) throw new Error('Failed to fetch order');
+        if (!res.ok) {
+            if (res.status === 401 || res.status === 403) {
+                throw new Error('Unauthorized - Please login');
+            }
+            throw new Error('Failed to fetch order');
+        }
         return res.json();
     },
 
