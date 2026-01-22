@@ -6,7 +6,7 @@ import { ShoppingCart, User, LogIn, ChevronDown, Package, Zap, Globe, Shield, Me
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
-    const { user, logout } = useAuth();
+    const { user, logout, isLoading } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -109,26 +109,28 @@ export default function Navbar() {
                         </span>
                     </button>
 
-                    {user ? (
-                        <div className="flex items-center gap-4 pl-4 border-l border-white/10">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center border-2 border-white/10 cursor-pointer hover:scale-105 transition-transform">
-                                <User className="w-5 h-5 text-white" />
+                    {!isLoading && (
+                        user ? (
+                            <div className="flex items-center gap-4 pl-4 border-l border-white/10">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center border-2 border-white/10 cursor-pointer hover:scale-105 transition-transform">
+                                    <User className="w-5 h-5 text-white" />
+                                </div>
+                                <button
+                                    onClick={logout}
+                                    className="text-xs font-bold text-gray-500 hover:text-rose-400 transition-colors uppercase tracking-widest"
+                                >
+                                    Sign Out
+                                </button>
                             </div>
-                            <button
-                                onClick={logout}
-                                className="text-xs font-bold text-gray-500 hover:text-rose-400 transition-colors uppercase tracking-widest"
+                        ) : (
+                            <Link
+                                href="/login"
+                                className="flex items-center gap-2 px-6 py-2.5 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transition-all active:scale-95"
                             >
-                                Sign Out
-                            </button>
-                        </div>
-                    ) : (
-                        <Link
-                            href="/login"
-                            className="flex items-center gap-2 px-6 py-2.5 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transition-all active:scale-95"
-                        >
-                            <LogIn className="w-4 h-4" />
-                            Login
-                        </Link>
+                                <LogIn className="w-4 h-4" />
+                                Login
+                            </Link>
+                        )
                     )}
                 </div>
             </div>
