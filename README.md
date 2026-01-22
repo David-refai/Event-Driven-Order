@@ -1,3 +1,5 @@
+
+
 # 🚀 Event-Driven Order Processing System
 
 <div align="center">
@@ -20,6 +22,40 @@
 
 This is a **comprehensive microservices ecosystem** that demonstrates how to build scalable, resilient, event-driven systems using modern technologies. The project implements a real-world order processing workflow where multiple services coordinate through **Apache Kafka** to handle distributed transactions.
 
+---
+# 🛠️ A-Z Operations Guide
+
+This section covers the essential commands to manage the EventFlow ecosystem.
+
+### 1. Initial Setup & Launch
+To start the entire system for the first time:
+```bash
+docker compose up -d
+```
+
+### 2. Creating the Admin User (Required)
+If you are starting with a fresh database, run this script to create the SuperAdmin account:
+```bash
+./setup_admin.sh
+```
+*Credentials: admin@admin.com / password123*
+
+### 3. Rebuilding Services
+If you modify a service (e.g., `frontend` or `order-service`):
+```bash
+docker compose build [service-name]
+docker compose up -d [service-name]
+```
+
+### 4. Full Reset
+To wipe everything and rebuild from scratch:
+```bash
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+```
+
+---
 ### Key Highlights
 
 - ✅ **Saga Choreography Pattern** for distributed transaction management
@@ -349,53 +385,54 @@ kafka/
 ```bash
 # All services
 docker compose logs -f
-
-# Specific service
-docker compose logs -f order-service
-
-# Container-level
-docker logs -f kafka-order-service-1
-```
-
----
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Java 21** with Records
-- **Spring Boot 3.2.2**
-- **Spring Kafka** for event streaming
-- **Spring Data JPA** with PostgreSQL
-- **Testcontainers** for integration testing
-- **Spring Boot Actuator** for health checks
-
-### Frontend
-- **Next.js 14** with App Router
-- **TypeScript** for type safety
-- **TailwindCSS** for styling
-- **shadcn/ui** for components
-- **SWR** for data fetching
-
-### Infrastructure
-- **Apache Kafka 7.5.0**
-- **PostgreSQL 15**
-- **Docker & Docker Compose**
-- **GitHub Actions** for CI/CD
-
----
-
-## 📚 Learn More
-
-- [Saga Pattern](https://microservices.io/patterns/data/saga.html)
-- [Transactional Outbox](https://microservices.io/patterns/data/transactional-outbox.html)
-- [Event-Driven Architecture](https://martinfowler.com/articles/201701-event-driven.html)
-
----
-
-<div align="center">
-
-**Built with ❤️ using Spring Boot, Kafka, and Next.js**
-
-*Developed by David Alrefai*
-
-</div>
++
++# Specific service
++docker compose logs -f order-service
++
++# Container-level
++docker logs -f kafka-order-service-1
++```
++
++---
++
++## 🛠️ Tech Stack
++
++### Backend
++- **Java 21** with Records
++- **Spring Boot 3.2.2**
++- **Spring Kafka** for event streaming
++- **Spring Data JPA** with PostgreSQL
++- **Testcontainers** for integration testing
++- **Spring Boot Actuator** for health checks
++
++### Frontend
++- **Next.js 14** with App Router
++- **TypeScript** for type safety
++- **TailwindCSS** for styling
++- **shadcn/ui** for components
++- **SWR** for data fetching
++
++### Infrastructure
++- **Apache Kafka 7.5.0**
++- **PostgreSQL 15**
++- **Docker & Docker Compose**
++- **GitHub Actions** for CI/CD
++
++---
++
++## 📚 Learn More
++
++- [Saga Pattern](https://microservices.io/patterns/data/saga.html)
++- [Transactional Outbox](https://microservices.io/patterns/data/transactional-outbox.html)
++- [Event-Driven Architecture](https://martinfowler.com/articles/201701-event-driven.html)
++
++---
++
++<div align="center">
++
++**Built with ❤️ using Spring Boot, Kafka, and Next.js**
++
++*Developed by David Alrefai*
++
++</div>
++

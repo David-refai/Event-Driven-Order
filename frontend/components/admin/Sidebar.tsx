@@ -26,9 +26,6 @@ export const Sidebar = () => {
                 <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
                     {user?.username || 'Administrator'}
                 </h2>
-                <span className="text-xs text-gray-400 uppercase tracking-wider mt-1">
-                    {user?.roles?.includes('ROLE_ADMIN') ? 'Super Admin' : 'Admin'}
-                </span>
             </div>
 
             {/* Navigation */}
