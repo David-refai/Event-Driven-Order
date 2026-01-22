@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { AUTH_URL } from '@/lib/config';
 
 interface User {
     username: string;
@@ -39,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const login = async (username: string, password: string) => {
-        const response = await fetch('http://localhost:8086/auth/login', {
+        const response = await fetch(`${AUTH_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -65,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const register = async (username: string, email: string, password: string) => {
-        const response = await fetch('http://localhost:8086/auth/register', {
+        const response = await fetch(`${AUTH_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password }),
@@ -83,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const refreshToken = async () => {
         try {
-            const response = await fetch('http://localhost:8086/auth/refreshtoken', {
+            const response = await fetch(`${AUTH_URL}/auth/refreshtoken`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -103,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const logout = async () => {
         try {
-            await fetch('http://localhost:8086/auth/logout', {
+            await fetch(`${AUTH_URL}/auth/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
