@@ -89,7 +89,7 @@ public class OrderService {
             throw new RuntimeException("Failed to serialize order event", e);
         }
 
-        return order.getId();
+        return getOrder(order.getId());
     }
 
     @Transactional(readOnly = true)
