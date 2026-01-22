@@ -1,0 +1,43 @@
+# Maven
+backend/*/target/
+backend/*/.mvn/
+backend/*/mvnw
+backend/*/mvnw.cmd
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/.cache/
+frontend/.vercel/
+
+# Logs
+*.log
+
+# Docker
+*.pid
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test
+backend/*/test-output/
+
+# Dashboard (old)
+dashboard/
+
+# Artifacts (brain files)
+.gemini/
