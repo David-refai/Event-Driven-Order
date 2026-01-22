@@ -14,6 +14,7 @@ interface AuthContextType {
     login: (username: string, password: string) => Promise<void>;
     register: (username: string, email: string, password: string) => Promise<void>;
     logout: () => void;
+    refreshToken: () => Promise<void>;
     isAuthenticated: boolean;
     isLoading: boolean;
 }
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
+            credentials: 'include',
         });
 
         if (!response.ok) {
@@ -67,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password }),
+            credentials: 'include',
         });
 
         if (!response.ok) {
@@ -78,12 +81,85 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await login(username, password);
     };
 
-    const logout = () => {
+    const refreshToken = async () => {
+        try {
+            const response = await fetch('http://localhost:8086/auth/refreshtoken', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setToken(data.accessToken);
+                localStorage.setItem('token', data.accessToken);
+            } else {
+                logout();
+            }
+        } catch (err) {
+            logout();
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await fetch('http://localhost:8086/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (err) {
+            console.error('Logout failed', err);
+        }
         setUser(null);
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
     };
+
+    // Auto-refresh token every 4 minutes (before it expires at 5 mins)
+    useEffect(() => {
+        if (!token) return;
+
+        const refreshInterval = setInterval(() => {
+            console.log('Refreshing access token...');
+            refreshToken();
+        }, 4 * 60 * 1000);
+
+        return () => clearInterval(refreshInterval);
+    }, [token]);
+
+    // Inactivity Timeout Logic (5 minutes)
+    useEffect(() => {
+        if (!token) return;
+
+        let timeoutId: NodeJS.Timeout;
+
+        const resetTimer = () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            // 5 minutes = 5 * 60 * 1000 ms
+            timeoutId = setTimeout(() => {
+                console.log('User inactive for 5 minutes, logging out...');
+                logout();
+            }, 5 * 60 * 1000);
+        };
+
+        // Events that indicate activity
+        const activities = ['mousemove', 'keydown', 'click', 'scroll'];
+
+        activities.forEach(event => {
+            window.addEventListener(event, resetTimer);
+        });
+
+        // Initial timer set
+        resetTimer();
+
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            activities.forEach(event => {
+                window.removeEventListener(event, resetTimer);
+            });
+        };
+    }, [token]);
 
     return (
         <AuthContext.Provider
@@ -93,6 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 login,
                 register,
                 logout,
+                refreshToken,
                 isAuthenticated: !!token,
                 isLoading,
             }}

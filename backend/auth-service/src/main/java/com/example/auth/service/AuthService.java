@@ -30,17 +30,20 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(AuthenticationManager authenticationManager,
-                       UserRepository userRepository,
-                       RoleRepository roleRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtTokenProvider tokenProvider) {
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            JwtTokenProvider tokenProvider,
+            RefreshTokenService refreshTokenService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -56,8 +59,7 @@ public class AuthService {
         User user = new User(
                 request.username(),
                 request.email(),
-                passwordEncoder.encode(request.password())
-        );
+                passwordEncoder.encode(request.password()));
 
         // Assign default role USER
         Set<Role> roles = new HashSet<>();
@@ -71,8 +73,7 @@ public class AuthService {
 
     public JwtResponse authenticateUser(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password())
-        );
+                new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
@@ -84,6 +85,24 @@ public class AuthService {
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return new JwtResponse(jwt, user.getUsername(), user.getEmail(), roles);
+        com.example.auth.entity.RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getUsername());
+
+        return new JwtResponse(jwt, refreshToken.getToken(), user.getUsername(), user.getEmail(), roles);
+    }
+
+    public com.example.auth.dto.TokenRefreshResponse refreshToken(com.example.auth.dto.TokenRefreshRequest request) {
+        String requestRefreshToken = request.refreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(com.example.auth.entity.RefreshToken::getUser)
+                .map(user -> {
+                    String roles = user.getRoles().stream()
+                            .map(role -> role.getName().name())
+                            .collect(Collectors.joining(","));
+                    String token = tokenProvider.generateTokenFromUsername(user.getUsername(), roles);
+                    return new com.example.auth.dto.TokenRefreshResponse(token, requestRefreshToken);
+                })
+                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 }
