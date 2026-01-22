@@ -23,6 +23,11 @@ public class CreateOrderRequest {
         private Integer quantity;
 
         public OrderItemRequest() {}
+        
+        public OrderItemRequest(String productId, Integer quantity) {
+            this.productId = productId;
+            this.quantity = quantity;
+        }
 
         public String getProductId() { return productId; }
         public void setProductId(String productId) { this.productId = productId; }
@@ -31,6 +36,13 @@ public class CreateOrderRequest {
     }
 
     public CreateOrderRequest() {}
+    
+    public CreateOrderRequest(String customerId, Double totalAmount, String currency, List<OrderItemRequest> items) {
+        this.customerId = customerId;
+        this.totalAmount = BigDecimal.valueOf(totalAmount);
+        this.currency = currency;
+        this.items = items;
+    }
 
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }

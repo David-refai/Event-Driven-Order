@@ -67,7 +67,7 @@ public class OrderServiceIntegrationTest {
                 "TEST-CUSTOMER",
                 250.00,
                 "USD",
-                Collections.singletonList(new CreateOrderRequest.OrderItem("PROD-1", 2))
+                Collections.singletonList(new CreateOrderRequest.OrderItemRequest("PROD-1", 2))
         );
 
         // Create Kafka consumer to verify event publication
