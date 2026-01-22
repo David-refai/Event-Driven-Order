@@ -40,49 +40,67 @@ The system consists of **5 microservices** communicating asynchronously through 
 ### Service Communication Flow
 
 ```mermaid
-graph TB
-    Client[Client/Dashboard] -->|1. POST /api/orders| OS[Order Service :8081]
+graph LR
+    Client[👤 Client/Dashboard<br/>Port 3000]
     
-    OS -->|2. Save Order| DB_OS[(PostgreSQL<br/>order_db)]
-    OS -->|3. Save to Outbox| DB_OS
+    Client -->|"1️⃣ POST /api/orders<br/>{customerId, amount}"| OS[Order Service<br/>Port 8081]
     
-    OS_OUTBOX[Outbox Scheduler] -.->|4. Poll & Publish| OS
-    OS_OUTBOX -->|5. OrderCreated Event| KAFKA((Apache Kafka<br/>orders.events))
+    OS -->|"2️⃣ Save Order"| DB_OS[(💾 PostgreSQL<br/>order_db)]
+    OS -->|"3️⃣ Save to Outbox"| DB_OS
     
-    KAFKA -->|6. Consume Event| IS[Inventory Service :8082]
-    KAFKA -->|6. Consume Event| PS[Payment Service :8083]
+    OS -.->|"4️⃣ Scheduler polls<br/>every 5 seconds"| OUTBOX[⏰ Outbox Publisher]
     
-    IS -->|7. Reserve Stock| DB_IS[(PostgreSQL<br/>inventory_db)]
-    IS -->|8. InventoryReserved| KAFKA_INV((Kafka<br/>inventory.events))
+    OUTBOX -->|"5️⃣ Publish OrderCreated"| KAFKA[Apache Kafka<br/>orders.events]
     
-    PS -->|7. Process Payment| DB_PS[(PostgreSQL<br/>payment_db)]
-    PS -->|8. PaymentSucceeded| KAFKA_PAY((Kafka<br/>payment.events))
+    KAFKA -->|"6️⃣ Consume OrderCreated"| IS[Inventory Service<br/>Port 8082]
+    KAFKA -->|"6️⃣ Consume OrderCreated"| PS[Payment Service<br/>Port 8083]
+    KAFKA -->|"6️⃣ Consume OrderCreated"| AS[Analytics Service<br/>Port 8085]
     
-    KAFKA_PAY -->|9. Consume| NS[Notification Service :8084]
-    NS -->|10. Send Email| EMAIL[Email/Log]
+    IS -->|"7️⃣ Reserve Stock"| DB_IS[(💾 PostgreSQL<br/>inventory_db)]
+    IS -->|"8️⃣ Publish InventoryReserved"| KAFKA_INV[Kafka<br/>inventory.events]
     
-    KAFKA -->|Real-time Stats| AS[Analytics Service :8085]
-    AS -->|Store Metrics| DB_AS[(PostgreSQL<br/>analytics_db)]
+    PS -->|"7️⃣ Process Payment"| DB_PS[(💾 PostgreSQL<br/>payment_db)]
+    PS -->|"8️⃣ Publish PaymentSucceeded"| KAFKA_PAY[Kafka<br/>payment.events]
     
-    Client -->|Monitor| DASH[Next.js Dashboard :3000]
-    DASH -->|Fetch Orders| OS
-    DASH -->|Fetch Analytics| AS
-    DASH -->|Health Checks| OS
-    DASH -->|Health Checks| IS
-    DASH -->|Health Checks| PS
-    DASH -->|Health Checks| NS
-    DASH -->|Health Checks| AS
+    KAFKA_PAY -->|"9️⃣ Consume PaymentSucceeded"| NS[Notification Service<br/>Port 8084]
+    NS -->|"🔟 Send Email"| EMAIL[📧 Email Log]
     
-    style KAFKA fill:#231F20,stroke:#fff,color:#fff
-    style KAFKA_INV fill:#231F20,stroke:#fff,color:#fff
-    style KAFKA_PAY fill:#231F20,stroke:#fff,color:#fff
-    style OS fill:#6DB33F,stroke:#fff,color:#fff
-    style IS fill:#6DB33F,stroke:#fff,color:#fff
-    style PS fill:#6DB33F,stroke:#fff,color:#fff
-    style NS fill:#6DB33F,stroke:#fff,color:#fff
-    style AS fill:#6DB33F,stroke:#fff,color:#fff
-    style DASH fill:#000,stroke:#fff,color:#fff
+    AS -->|"Real-time Stats"| DB_AS[(💾 PostgreSQL<br/>analytics_db)]
+    
+    Client -.->|"Monitor: GET /orders"| OS
+    Client -.->|"Monitor: GET /analytics/stats"| AS
+    Client -.->|"Health Checks"| OS
+    Client -.->|"Health Checks"| IS
+    Client -.->|"Health Checks"| PS
+    Client -.->|"Health Checks"| NS
+    Client -.->|"Health Checks"| AS
+    
+    style Client fill:#4CAF50,stroke:#2E7D32,stroke-width:3px,color:#fff
+    style OS fill:#2196F3,stroke:#1565C0,stroke-width:3px,color:#fff
+    style IS fill:#2196F3,stroke:#1565C0,stroke-width:3px,color:#fff
+    style PS fill:#2196F3,stroke:#1565C0,stroke-width:3px,color:#fff
+    style NS fill:#2196F3,stroke:#1565C0,stroke-width:3px,color:#fff
+    style AS fill:#2196F3,stroke:#1565C0,stroke-width:3px,color:#fff
+    style KAFKA fill:#000,stroke:#FF6B6B,stroke-width:4px,color:#fff
+    style KAFKA_INV fill:#000,stroke:#FF6B6B,stroke-width:4px,color:#fff
+    style KAFKA_PAY fill:#000,stroke:#FF6B6B,stroke-width:4px,color:#fff
+    style OUTBOX fill:#FFA726,stroke:#E65100,stroke-width:3px,color:#fff
+    style DB_OS fill:#455A64,stroke:#263238,stroke-width:2px,color:#fff
+    style DB_IS fill:#455A64,stroke:#263238,stroke-width:2px,color:#fff
+    style DB_PS fill:#455A64,stroke:#263238,stroke-width:2px,color:#fff
+    style DB_AS fill:#455A64,stroke:#263238,stroke-width:2px,color:#fff
+    style EMAIL fill:#9C27B0,stroke:#6A1B9A,stroke-width:2px,color:#fff
 ```
+
+**Legend:**
+- 🟢 **Green** = Client/UI
+- 🔵 **Blue** = Microservices
+- ⚫ **Black** = Kafka Topics
+- 🟠 **Orange** = Schedulers
+- ⚪ **Gray** = Databases
+- 🟣 **Purple** = External Systems
+- **Solid lines** (→) = Direct API calls or event publishing
+- **Dotted lines** (···→) = Polling or monitoring
 
 ### Kafka Event Flow (Saga Choreography)
 
