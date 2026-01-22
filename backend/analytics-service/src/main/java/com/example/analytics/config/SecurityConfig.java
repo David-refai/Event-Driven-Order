@@ -1,7 +1,7 @@
-package com.example.order.config;
+package com.example.analytics.config;
 
-import com.example.order.security.JwtAuthenticationFilter;
-import com.example.order.security.JwtTokenProvider;
+import com.example.analytics.security.JwtAuthenticationFilter;
+import com.example.analytics.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -29,7 +29,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated());
 
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(tokenProvider);

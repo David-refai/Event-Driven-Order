@@ -61,20 +61,18 @@ public class OrderService {
 
         // Prepare OrderCreatedEvent payload
         OrderCreatedEvent eventPayload = new OrderCreatedEvent(
-            order.getId(),
-            order.getCustomerId(),
-            order.getTotalAmount(),
-            order.getCurrency(),
-            order.getItems().stream()
-                .map(i -> new OrderCreatedEvent.OrderItemPayload(i.getProductId(), i.getQuantity()))
-                .collect(Collectors.toList())
-        );
+                order.getId(),
+                order.getCustomerId(),
+                order.getTotalAmount(),
+                order.getCurrency(),
+                order.getItems().stream()
+                        .map(i -> new OrderCreatedEvent.OrderItemPayload(i.getProductId(), i.getQuantity()))
+                        .collect(Collectors.toList()));
 
         BaseEvent<OrderCreatedEvent> event = BaseEvent.create(
-            KafkaConstants.ORDER_CREATED_V1,
-            eventPayload,
-            correlationId
-        );
+                KafkaConstants.ORDER_CREATED_V1,
+                eventPayload,
+                correlationId);
 
         try {
             Outbox outbox = new Outbox();
@@ -95,18 +93,35 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderResponse getOrder(String orderId) {
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
         return OrderResponse.builder()
-            .orderId(order.getId())
-            .customerId(order.getCustomerId())
-            .status(order.getStatus().name())
-            .totalAmount(order.getTotalAmount())
-            .currency(order.getCurrency())
-            .createdAt(order.getCreatedAt())
-            .items(order.getItems().stream()
-                .map(i -> new OrderResponse.OrderItemResponse(i.getProductId(), i.getQuantity()))
-                .collect(Collectors.toList()))
-            .build();
+                .orderId(order.getId())
+                .customerId(order.getCustomerId())
+                .status(order.getStatus().name())
+                .totalAmount(order.getTotalAmount())
+                .currency(order.getCurrency())
+                .createdAt(order.getCreatedAt())
+                .items(order.getItems().stream()
+                        .map(i -> new OrderResponse.OrderItemResponse(i.getProductId(), i.getQuantity()))
+                        .collect(Collectors.toList()))
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.List<OrderResponse> getAllOrders() {
+        return orderRepository.findAll().stream()
+                .map(order -> OrderResponse.builder()
+                        .orderId(order.getId())
+                        .customerId(order.getCustomerId())
+                        .status(order.getStatus().name())
+                        .totalAmount(order.getTotalAmount())
+                        .currency(order.getCurrency())
+                        .createdAt(order.getCreatedAt())
+                        .items(order.getItems().stream()
+                                .map(i -> new OrderResponse.OrderItemResponse(i.getProductId(), i.getQuantity()))
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
     }
 }

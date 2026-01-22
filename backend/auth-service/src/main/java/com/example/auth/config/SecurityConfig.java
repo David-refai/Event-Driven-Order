@@ -49,7 +49,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public com.example.auth.security.JwtAuthenticationFilter jwtAuthenticationFilter(
+            com.example.auth.security.JwtTokenProvider tokenProvider) {
+        return new com.example.auth.security.JwtAuthenticationFilter(tokenProvider);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http,
+            com.example.auth.security.JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -58,6 +65,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
+        http.addFilterBefore(jwtAuthenticationFilter,
+                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

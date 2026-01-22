@@ -5,13 +5,12 @@ import com.example.analytics.repository.EventStatRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/analytics")
-@CrossOrigin(origins = "*")
 public class AnalyticsController {
     private final EventStatRepository repository;
 
@@ -20,6 +19,7 @@ public class AnalyticsController {
     }
 
     @GetMapping("/stats")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<EventStat> getStats() {
         return repository.findAll();
     }

@@ -95,7 +95,20 @@ export default function Dashboard() {
             <div className="text-white text-sm">
               <div className="font-semibold">{user?.username}</div>
               <div className="text-slate-400 text-xs">{user?.roles.join(', ')}</div>
+              {/* DEBUG INFO */}
+              <div className="text-xs text-red-500 hidden group-hover:block absolute top-0 right-0 bg-black p-2">
+                Roles: {JSON.stringify(user?.roles)}
+              </div>
             </div>
+            {user?.roles.includes('ROLE_ADMIN') && (
+              <Button
+                variant="default"
+                className="bg-blue-600 hover:bg-blue-500 text-white"
+                onClick={() => router.push('/admin/dashboard')}
+              >
+                Admin Dashboard
+              </Button>
+            )}
             <Button variant="outline" onClick={logout}>
               Logout
             </Button>

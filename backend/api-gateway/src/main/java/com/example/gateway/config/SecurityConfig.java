@@ -40,7 +40,9 @@ public class SecurityConfig {
             .authorizeExchange(exchange -> exchange
                 .pathMatchers(org.springframework.http.HttpMethod.OPTIONS).permitAll()
                 .pathMatchers("/auth/**").permitAll()
-                .pathMatchers("/actuator/**").permitAll()
+                .pathMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
+                .pathMatchers("/health/**").hasAuthority("ROLE_ADMIN")
+                .pathMatchers("/api/analytics/**").hasAuthority("ROLE_ADMIN")
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2

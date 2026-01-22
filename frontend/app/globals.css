@@ -115,11 +115,29 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@utility glass {
+  background-color: oklch(1 0 0 / 5%);
+  backdrop-filter: blur(24px);
+  border: 1px solid oklch(1 0 0 / 10%);
+}
+
+@utility glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: var(--ring);
   }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }

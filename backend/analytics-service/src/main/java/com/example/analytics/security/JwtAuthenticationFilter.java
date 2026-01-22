@@ -1,4 +1,4 @@
-package com.example.order.security;
+package com.example.analytics.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
