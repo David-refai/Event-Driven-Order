@@ -101,7 +101,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6 min-w-[120px] justify-end">
                     <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
                         <ShoppingCart className="w-5 h-5" />
                         <span className="absolute top-0 right-0 w-4 h-4 bg-blue-600 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-gray-950">
@@ -109,8 +109,8 @@ export default function Navbar() {
                         </span>
                     </button>
 
-                    {!isLoading && (
-                        user ? (
+                    <div className={`transition-all duration-500 ${isLoading ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
+                        {user ? (
                             <div className="flex items-center gap-4 pl-4 border-l border-white/10">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center border-2 border-white/10 cursor-pointer hover:scale-105 transition-transform">
                                     <User className="w-5 h-5 text-white" />
@@ -130,8 +130,8 @@ export default function Navbar() {
                                 <LogIn className="w-4 h-4" />
                                 Login
                             </Link>
-                        )
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </nav>
