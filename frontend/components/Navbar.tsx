@@ -55,7 +55,7 @@ export default function Navbar() {
 
                     {/* Products Mega Menu Trigger */}
                     <div
-                        className="group relative py-2"
+                        className="group py-2"
                         onMouseEnter={() => setIsMenuOpen(true)}
                         onMouseLeave={() => setIsMenuOpen(false)}
                     >
@@ -65,31 +65,33 @@ export default function Navbar() {
                         </button>
 
                         {/* Mega Menu Content */}
-                        <div className={`absolute top-full -left-64 w-[100vw] max-w-[1280px] pt-4 transition-all duration-500 ${isMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
+                        <div className={`absolute top-full left-0 w-full pt-4 transition-all duration-500 ${isMenuOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'
                             }`}>
-                            <div className="bg-gray-900/95 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-8 grid grid-cols-2 gap-12">
-                                {categories.map((cat) => (
-                                    <div key={cat.title}>
-                                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-6">{cat.title}</h3>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            {cat.items.map((item) => (
-                                                <Link
-                                                    key={item.name}
-                                                    href={`/products/${item.name.toLowerCase().replace(' ', '-')}`}
-                                                    className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all group/item"
-                                                >
-                                                    <div className="p-3 bg-gray-800/50 rounded-xl group-hover/item:scale-110 transition-transform">
-                                                        <item.icon className="w-5 h-5 text-blue-400" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-white group-hover/item:text-blue-400 transition-colors">{item.name}</p>
-                                                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">{item.desc}</p>
-                                                    </div>
-                                                </Link>
-                                            ))}
+                            <div className="max-w-7xl mx-auto px-6">
+                                <div className="bg-gray-900/95 backdrop-blur-2xl border border-white/10 rounded-[32px] overflow-hidden shadow-2xl p-8 grid grid-cols-2 gap-12">
+                                    {categories.map((cat) => (
+                                        <div key={cat.title}>
+                                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mb-6">{cat.title}</h3>
+                                            <div className="grid grid-cols-2 gap-6">
+                                                {cat.items.map((item) => (
+                                                    <Link
+                                                        key={item.name}
+                                                        href={`/products/${item.name.toLowerCase().replace(' ', '-')}`}
+                                                        className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all group/item"
+                                                    >
+                                                        <div className="p-3 bg-gray-800/50 rounded-xl group-hover/item:scale-110 transition-transform">
+                                                            <item.icon className="w-5 h-5 text-blue-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-white group-hover/item:text-blue-400 transition-colors">{item.name}</p>
+                                                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">{item.desc}</p>
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
