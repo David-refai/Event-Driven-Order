@@ -3,8 +3,11 @@
 import React from 'react';
 import { ArrowRight, MousePointer2, Sparkles, Zap, Shield, BarChart3, Globe } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden bg-gray-950">
       {/* Animated Background Gradients */}
@@ -31,7 +34,7 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
           <Link
-            href="/login"
+            href={isAuthenticated ? "/admin/dashboard" : "/login"}
             className="group flex items-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-2xl hover:bg-blue-50 transition-all active:scale-95 shadow-2xl shadow-white/5"
           >
             Launch Dashboard
