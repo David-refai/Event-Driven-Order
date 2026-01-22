@@ -12,8 +12,10 @@ export default function Navbar() {
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+
+        handleScroll();
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     const categories = [
@@ -38,9 +40,10 @@ export default function Navbar() {
     ];
 
     return (
-        <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isScrolled ? 'bg-gray-950/80 backdrop-blur-xl border-b border-white/10 py-3' : 'bg-transparent py-5'
-            }`}>
-            <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <nav className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500
+            ${isScrolled ? "bg-gray-950/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent"}`}
+        >
+            <div className="h-16 max-w-7xl mx-auto px-6 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group">
                     <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
@@ -109,8 +112,10 @@ export default function Navbar() {
                         </span>
                     </button>
 
-                    <div className={`transition-all duration-500 ${isLoading ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
-                        {user ? (
+                    <div className="min-w-[220px] flex justify-end">
+                        {isLoading ? (
+                            <div className="h-10 w-40 rounded-full bg-white/10 animate-pulse" />
+                        ) : user ? (
                             <div className="flex items-center gap-4 pl-4 border-l border-white/10">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center border-2 border-white/10 cursor-pointer hover:scale-105 transition-transform">
                                     <User className="w-5 h-5 text-white" />
