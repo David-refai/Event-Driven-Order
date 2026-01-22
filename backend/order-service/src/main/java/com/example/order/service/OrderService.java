@@ -37,7 +37,7 @@ public class OrderService {
     }
 
     @Transactional
-    public String createOrder(CreateOrderRequest request) {
+    public OrderResponse createOrder(CreateOrderRequest request) {
         String correlationId = CorrelationIdUtils.getCorrelationId();
         log.info("Creating order for customer: {}", request.getCustomerId());
 
