@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,79 +38,76 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 public class OrderServiceIntegrationTest {
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:15"))
-            .withDatabaseName("order_db_test")
-            .withUsername("test")
-            .withPassword("test");
+        @Container
+        static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:15"))
+                        .withDatabaseName("order_db_test")
+                        .withUsername("test")
+                        .withPassword("test");
 
-    @Container
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"));
+        @Container
+        static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"));
 
-    @Autowired
-    private MockMvc mockMvc;
+        @Autowired
+        private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+        @Autowired
+        private ObjectMapper objectMapper;
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-    }
+        @DynamicPropertySource
+        static void configureProperties(DynamicPropertyRegistry registry) {
+                registry.add("spring.datasource.url", postgres::getJdbcUrl);
+                registry.add("spring.datasource.username", postgres::getUsername);
+                registry.add("spring.datasource.password", postgres::getPassword);
+                registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+        }
 
-    @Test
-    void shouldCreateOrderAndPublishEvent() throws Exception {
-        // Given: A valid order request
-        CreateOrderRequest request = new CreateOrderRequest(
-                "TEST-CUSTOMER",
-                250.00,
-                "USD",
-                Collections.singletonList(new CreateOrderRequest.OrderItemRequest("PROD-1", 2))
-        );
+        @Test
+        @WithMockUser(username = "testuser", roles = { "USER" })
+        void shouldCreateOrderAndPublishEvent() throws Exception {
+                // Given: A valid order request
+                CreateOrderRequest request = new CreateOrderRequest(
+                                "TEST-CUSTOMER",
+                                250.00,
+                                "USD",
+                                Collections.singletonList(new CreateOrderRequest.OrderItemRequest("PROD-1", 2)));
 
-        // Create Kafka consumer to verify event publication
-        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
-                kafka.getBootstrapServers(),
-                "test-group",
-                "true"
-        );
-        consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+                // Create Kafka consumer to verify event publication
+                Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
+                                kafka.getBootstrapServers(),
+                                "test-group",
+                                "true");
+                consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(
-                consumerProps,
-                new StringDeserializer(),
-                new StringDeserializer()
-        ).createConsumer();
+                Consumer<String, String> consumer = new DefaultKafkaConsumerFactory<>(
+                                consumerProps,
+                                new StringDeserializer(),
+                                new StringDeserializer()).createConsumer();
 
-        consumer.subscribe(Collections.singletonList("orders.events"));
+                consumer.subscribe(Collections.singletonList("orders.events"));
 
-        // When: We create an order
-        String result = mockMvc.perform(post("/api/orders")
-                        .header("X-API-KEY", "secret-api-key")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.orderId").isNotEmpty())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                // When: We create an order
+                String result = mockMvc.perform(post("/api/orders")
+                                .header("X-API-KEY", "secret-api-key")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.orderId").isNotEmpty())
+                                .andReturn()
+                                .getResponse()
+                                .getContentAsString();
 
-        String orderId = objectMapper.readTree(result).get("orderId").asText();
+                String orderId = objectMapper.readTree(result).get("orderId").asText();
 
-        // Then: Event should be published to Kafka
-        ConsumerRecord<String, String> record = KafkaTestUtils.getSingleRecord(
-                consumer,
-                "orders.events",
-                Duration.ofSeconds(10)
-        );
+                // Then: Event should be published to Kafka
+                ConsumerRecord<String, String> record = KafkaTestUtils.getSingleRecord(
+                                consumer,
+                                "orders.events",
+                                Duration.ofSeconds(10));
 
-        assertThat(record).isNotNull();
-        assertThat(record.value()).contains(orderId);
-        assertThat(record.value()).contains("OrderCreated");
+                assertThat(record).isNotNull();
+                assertThat(record.value()).contains(orderId);
+                assertThat(record.value()).contains("OrderCreated");
 
-        consumer.close();
-    }
+                consumer.close();
+        }
 }
