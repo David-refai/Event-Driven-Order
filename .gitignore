@@ -37,8 +37,5 @@ frontend/.vercel/
 # Test
 backend/*/test-output/
 
-# Dashboard (old)
-dashboard/
-
 # Artifacts (brain files)
 .gemini/
