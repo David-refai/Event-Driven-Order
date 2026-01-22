@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <div className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden bg-gray-950">
@@ -33,13 +33,15 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-          <Link
-            href={isAuthenticated ? "/admin/dashboard" : "/login"}
-            className="group flex items-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-2xl hover:bg-blue-50 transition-all active:scale-95 shadow-2xl shadow-white/5"
-          >
-            Launch Dashboard
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
+          {!isLoading && (
+            <Link
+              href={isAuthenticated ? "/admin/dashboard" : "/login"}
+              className="group flex items-center gap-3 px-10 py-5 bg-white text-black font-bold rounded-2xl hover:bg-blue-50 transition-all active:scale-95 shadow-2xl shadow-white/5"
+            >
+              Launch Dashboard
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          )}
 
           <Link
             href="/about"
