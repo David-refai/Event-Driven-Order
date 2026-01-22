@@ -12,6 +12,12 @@ import java.util.Optional;
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByToken(String token);
 
+    Optional<RefreshToken> findByUser(User user);
+
+    @Modifying
+    @org.springframework.data.jpa.repository.Query(value = "DELETE FROM refreshtoken WHERE user_id = :userId", nativeQuery = true)
+    void deleteByUserId(@org.springframework.data.repository.query.Param("userId") Long userId);
+
     @Modifying
     int deleteByUser(User user);
 }

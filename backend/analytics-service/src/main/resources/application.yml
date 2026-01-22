@@ -29,3 +29,6 @@ management:
       cors:
         allowed-origins: "*"
         allowed-methods: "*"
+
+jwt:
+  secret: M/wZlUpJUUTKSwRfDkPgLHCwalDUxt/hEx/tgtaxWoA=

@@ -29,6 +29,8 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(JwtTokenProvider.class);
+
     public boolean validateToken(String authToken) {
         try {
             Jwts.parser()
@@ -37,6 +39,7 @@ public class JwtTokenProvider {
                     .parseSignedClaims(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            logger.error("Invalid JWT signature: {}", e.getMessage());
             return false;
         }
     }

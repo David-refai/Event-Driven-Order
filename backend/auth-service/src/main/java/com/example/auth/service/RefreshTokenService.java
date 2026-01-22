@@ -28,16 +28,21 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByToken(token);
     }
 
+    @Transactional
     public RefreshToken createRefreshToken(String username) {
-        RefreshToken refreshToken = new RefreshToken();
+        com.example.auth.entity.User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
 
-        refreshToken.setUser(userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username)));
+        // Delete existing refresh token if any using user ID
+        refreshTokenRepository.deleteByUserId(user.getId());
+        refreshTokenRepository.flush();
+
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
-        refreshToken = refreshTokenRepository.save(refreshToken);
-        return refreshToken;
+        return refreshTokenRepository.save(refreshToken);
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {

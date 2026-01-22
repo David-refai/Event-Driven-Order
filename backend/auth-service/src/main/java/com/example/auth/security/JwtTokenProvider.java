@@ -40,7 +40,7 @@ public class JwtTokenProvider {
                 .claim("roles", roles)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(getSigningKey())
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
@@ -53,7 +53,7 @@ public class JwtTokenProvider {
                 .claim("roles", roles)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(getSigningKey())
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
 

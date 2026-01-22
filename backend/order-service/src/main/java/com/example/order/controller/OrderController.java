@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "*")
 public class OrderController {
     private final OrderService orderService;
 
@@ -25,7 +24,8 @@ public class OrderController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN', 'ROLE_MANAGER')")
-    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request, Principal principal) {
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request,
+            Principal principal) {
         // Log the authenticated user
         System.out.println("Order created by user: " + principal.getName());
         OrderResponse response = orderService.createOrder(request);
