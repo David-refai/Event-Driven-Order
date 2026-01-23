@@ -28,7 +28,8 @@ public class InventoryConsumer {
     public void consumeOrderCreated(String message, Acknowledgment ack) {
         log.info("Received order event in inventory: {}", message);
         try {
-            BaseEvent<OrderCreatedEvent> event = objectMapper.readValue(message, new TypeReference<>() {});
+            BaseEvent<OrderCreatedEvent> event = objectMapper.readValue(message, new TypeReference<>() {
+            });
             inventoryService.processOrderCreated(event);
             ack.acknowledge();
         } catch (Exception e) {

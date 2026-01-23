@@ -13,6 +13,10 @@ spring:
           uri: http://auth-service:8086
           predicates:
             - Path=/auth/**, /users/**
+        - id: product-service
+          uri: http://product-service:8087
+          predicates:
+            - Path=/api/products/**, /api/categories/**
         - id: order-service
           uri: http://order-service:8081
           predicates:
@@ -59,6 +63,12 @@ spring:
           uri: http://payment-service:8083
           predicates:
             - Path=/health/payments
+          filters:
+            - SetPath=/actuator/health
+        - id: product-service-health
+          uri: http://product-service:8087
+          predicates:
+            - Path=/health/products
           filters:
             - SetPath=/actuator/health
 

@@ -23,6 +23,7 @@
         <module>notification-service</module>
         <module>analytics-service</module>
         <module>auth-service</module>
+        <module>product-service</module>
         <module>api-gateway</module>
     </modules>
 

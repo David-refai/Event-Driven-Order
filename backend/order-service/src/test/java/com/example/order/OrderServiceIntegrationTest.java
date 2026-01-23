@@ -69,7 +69,8 @@ public class OrderServiceIntegrationTest {
                                 "TEST-CUSTOMER",
                                 250.00,
                                 "USD",
-                                Collections.singletonList(new CreateOrderRequest.OrderItemRequest("PROD-1", 2)));
+                                Collections.singletonList(new CreateOrderRequest.OrderItemRequest("PROD-1",
+                                                "Test Product", java.math.BigDecimal.valueOf(125.0), 2)));
 
                 // Create Kafka consumer to verify event publication
                 Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(

@@ -15,15 +15,33 @@ public class OrderResponse {
 
     public static class OrderItemResponse {
         private String productId;
+        private String productName;
+        private java.math.BigDecimal unitPrice;
         private Integer quantity;
 
-        public OrderItemResponse(String productId, Integer quantity) {
+        public OrderItemResponse(String productId, String productName, java.math.BigDecimal unitPrice,
+                Integer quantity) {
             this.productId = productId;
+            this.productName = productName;
+            this.unitPrice = unitPrice;
             this.quantity = quantity;
         }
 
-        public String getProductId() { return productId; }
-        public Integer getQuantity() { return quantity; }
+        public String getProductId() {
+            return productId;
+        }
+
+        public String getProductName() {
+            return productName;
+        }
+
+        public java.math.BigDecimal getUnitPrice() {
+            return unitPrice;
+        }
+
+        public Integer getQuantity() {
+            return quantity;
+        }
     }
 
     private OrderResponse(Builder builder) {
@@ -36,7 +54,9 @@ public class OrderResponse {
         this.items = builder.items;
     }
 
-    public static Builder builder() { return new Builder(); }
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static class Builder {
         private String orderId;
@@ -47,21 +67,71 @@ public class OrderResponse {
         private LocalDateTime createdAt;
         private List<OrderItemResponse> items;
 
-        public Builder orderId(String orderId) { this.orderId = orderId; return this; }
-        public Builder customerId(String customerId) { this.customerId = customerId; return this; }
-        public Builder status(String status) { this.status = status; return this; }
-        public Builder totalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; return this; }
-        public Builder currency(String currency) { this.currency = currency; return this; }
-        public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
-        public Builder items(List<OrderItemResponse> items) { this.items = items; return this; }
-        public OrderResponse build() { return new OrderResponse(this); }
+        public Builder orderId(String orderId) {
+            this.orderId = orderId;
+            return this;
+        }
+
+        public Builder customerId(String customerId) {
+            this.customerId = customerId;
+            return this;
+        }
+
+        public Builder status(String status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder totalAmount(BigDecimal totalAmount) {
+            this.totalAmount = totalAmount;
+            return this;
+        }
+
+        public Builder currency(String currency) {
+            this.currency = currency;
+            return this;
+        }
+
+        public Builder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder items(List<OrderItemResponse> items) {
+            this.items = items;
+            return this;
+        }
+
+        public OrderResponse build() {
+            return new OrderResponse(this);
+        }
     }
 
-    public String getOrderId() { return orderId; }
-    public String getCustomerId() { return customerId; }
-    public String getStatus() { return status; }
-    public BigDecimal getTotalAmount() { return totalAmount; }
-    public String getCurrency() { return currency; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public List<OrderItemResponse> getItems() { return items; }
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<OrderItemResponse> getItems() {
+        return items;
+    }
 }

@@ -52,6 +52,8 @@ public class OrderService {
         order.setItems(request.getItems().stream().map(itemReq -> {
             OrderItem item = new OrderItem();
             item.setProductId(itemReq.getProductId());
+            item.setProductName(itemReq.getProductName());
+            item.setUnitPrice(itemReq.getUnitPrice());
             item.setQuantity(itemReq.getQuantity());
             item.setOrder(order);
             return item;
@@ -66,7 +68,8 @@ public class OrderService {
                 order.getTotalAmount(),
                 order.getCurrency(),
                 order.getItems().stream()
-                        .map(i -> new OrderCreatedEvent.OrderItemPayload(i.getProductId(), i.getQuantity()))
+                        .map(i -> new OrderCreatedEvent.OrderItemPayload(i.getProductId(), i.getProductName(),
+                                i.getUnitPrice(), i.getQuantity()))
                         .collect(Collectors.toList()));
 
         BaseEvent<OrderCreatedEvent> event = BaseEvent.create(
@@ -103,7 +106,8 @@ public class OrderService {
                 .currency(order.getCurrency())
                 .createdAt(order.getCreatedAt())
                 .items(order.getItems().stream()
-                        .map(i -> new OrderResponse.OrderItemResponse(i.getProductId(), i.getQuantity()))
+                        .map(i -> new OrderResponse.OrderItemResponse(i.getProductId(), i.getProductName(),
+                                i.getUnitPrice(), i.getQuantity()))
                         .collect(Collectors.toList()))
                 .build();
     }
@@ -119,7 +123,8 @@ public class OrderService {
                         .currency(order.getCurrency())
                         .createdAt(order.getCreatedAt())
                         .items(order.getItems().stream()
-                                .map(i -> new OrderResponse.OrderItemResponse(i.getProductId(), i.getQuantity()))
+                                .map(i -> new OrderResponse.OrderItemResponse(i.getProductId(), i.getProductName(),
+                                        i.getUnitPrice(), i.getQuantity()))
                                 .collect(Collectors.toList()))
                         .build())
                 .collect(Collectors.toList());
