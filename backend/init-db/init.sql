@@ -4,6 +4,7 @@ CREATE DATABASE payment_db;
 CREATE DATABASE analytics_db;
 CREATE DATABASE auth_db;
 CREATE DATABASE keycloak_db;
+CREATE DATABASE product_db;
 
 -- Grant permissions
 GRANT ALL PRIVILEGES ON DATABASE order_db TO "user";
@@ -12,3 +13,4 @@ GRANT ALL PRIVILEGES ON DATABASE payment_db TO "user";
 GRANT ALL PRIVILEGES ON DATABASE analytics_db TO "user";
 GRANT ALL PRIVILEGES ON DATABASE auth_db TO "user";
 GRANT ALL PRIVILEGES ON DATABASE keycloak_db TO "user";
+GRANT ALL PRIVILEGES ON DATABASE product_db TO "user";

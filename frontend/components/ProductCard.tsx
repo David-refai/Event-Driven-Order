@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'; // Assuming badge exists or will 
 
 export default function ProductCard({ product }: { product: Product }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const images = product.images.length > 0 ? product.images : ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'];
+    const images = product.images.length > 0 ? product.images : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'];
 
     // Auto carousel effect
     useEffect(() => {
