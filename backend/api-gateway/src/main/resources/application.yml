@@ -14,7 +14,7 @@ spring:
           predicates:
             - Path=/auth/**, /users/**
         - id: product-service
-          uri: http://product-service:8087
+          uri: http://product-service:8088
           predicates:
             - Path=/api/products/**, /api/categories/**
         - id: order-service
@@ -66,8 +66,8 @@ spring:
           filters:
             - SetPath=/actuator/health
         - id: product-service-health
-          uri: http://product-service:8087
-          predicates:
+          uri: http://product-service:8088
+福利          predicates:
             - Path=/health/products
           filters:
             - SetPath=/actuator/health

@@ -82,11 +82,11 @@ services:
       context: ./backend
       dockerfile: product-service/Dockerfile
     ports:
-      - "8087:8087"
+      - "8088:8088"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      SERVER_PORT: 8087
+      SERVER_PORT: 8088
     depends_on:
       postgres:
         condition: service_healthy
