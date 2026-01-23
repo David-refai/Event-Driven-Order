@@ -1,10 +1,7 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-# Copy the parent pom and common module
-COPY pom.xml .
-COPY common ./common
-# Copy the product-service source
-COPY product-service ./product-service
+# Copy the entire backend directory (context is ./backend)
+COPY . .
 # Build the service
 RUN mvn clean package -pl product-service -am -DskipTests
 
