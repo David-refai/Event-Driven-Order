@@ -36,13 +36,16 @@ export interface HealthStatus {
     status: 'UP' | 'DOWN' | 'UNKNOWN';
 }
 
-const getAuthHeaders = (): HeadersInit => {
+const getAuthHeaders = (isMultipart = false): HeadersInit => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return {
-        'Content-Type': 'application/json',
+    const headers: Record<string, string> = {
         'X-API-KEY': API_KEY,
         ...(token && { 'Authorization': `Bearer ${token}` }),
     };
+    if (!isMultipart) {
+        headers['Content-Type'] = 'application/json';
+    }
+    return headers;
 };
 
 export const apiClient = {
@@ -103,21 +106,21 @@ export const apiClient = {
         return res.json();
     },
 
-    async createProduct(data: Partial<Product>): Promise<Product> {
+    async createProduct(data: FormData): Promise<Product> {
         const res = await fetch(`${API_BASE_URL}/api/products`, {
             method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data),
+            headers: getAuthHeaders(true),
+            body: data,
         });
         if (!res.ok) throw new Error('Failed to create product');
         return res.json();
     },
 
-    async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
+    async updateProduct(id: string, data: FormData): Promise<Product> {
         const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
             method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(data),
+            headers: getAuthHeaders(true),
+            body: data,
         });
         if (!res.ok) throw new Error('Failed to update product');
         return res.json();

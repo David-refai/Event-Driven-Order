@@ -4,8 +4,10 @@ import com.example.product.domain.Product;
 import com.example.product.dto.ProductRequest;
 import com.example.product.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,14 +30,19 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    @PostMapping
-    public Product createProduct(@Valid @RequestBody ProductRequest request) {
-        return productService.createProduct(request);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Product createProduct(
+            @Valid @RequestPart("product") ProductRequest request,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
+        return productService.createProduct(request, files);
     }
 
-    @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable String id, @Valid @RequestBody ProductRequest request) {
-        return productService.updateProduct(id, request);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Product updateProduct(
+            @PathVariable String id,
+            @Valid @RequestPart("product") ProductRequest request,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
+        return productService.updateProduct(id, request, files);
     }
 
     @DeleteMapping("/{id}")

@@ -39,8 +39,8 @@ export default function AdminProductsPage() {
         price: '',
         inventory: '',
         categoryId: '',
-        images: [''] // Array for multiple image URLs
     });
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
     useEffect(() => {
         fetchData();
@@ -69,8 +69,8 @@ export default function AdminProductsPage() {
             price: product.price.toString(),
             inventory: product.inventory.toString(),
             categoryId: product.category?.id?.toString() || '',
-            images: product.images.length > 0 ? product.images : ['']
         });
+        setSelectedFiles([]);
         setIsFormOpen(true);
     };
 
@@ -88,13 +88,20 @@ export default function AdminProductsPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const data = {
-                ...formData,
+            const productData = {
+                name: formData.name,
+                description: formData.description,
                 price: parseFloat(formData.price),
                 inventory: parseInt(formData.inventory),
                 categoryId: formData.categoryId ? parseInt(formData.categoryId) : undefined,
-                images: formData.images.filter(url => url.trim() !== '')
             };
+
+            const data = new FormData();
+            data.append('product', new Blob([JSON.stringify(productData)], { type: 'application/json' }));
+
+            selectedFiles.forEach(file => {
+                data.append('files', file);
+            });
 
             if (editingProduct) {
                 await apiClient.updateProduct(editingProduct.id, data);
@@ -104,26 +111,19 @@ export default function AdminProductsPage() {
 
             setIsFormOpen(false);
             setEditingProduct(null);
-            setFormData({ name: '', description: '', price: '', inventory: '', categoryId: '', images: [''] });
+            setFormData({ name: '', description: '', price: '', inventory: '', categoryId: '' });
+            setSelectedFiles([]);
             fetchData();
         } catch (error) {
+            console.error(error);
             alert('Failed to save product');
         }
     };
 
-    const addImageField = () => {
-        setFormData({ ...formData, images: [...formData.images, ''] });
-    };
-
-    const updateImageField = (index: number, value: string) => {
-        const newImages = [...formData.images];
-        newImages[index] = value;
-        setFormData({ ...formData, images: newImages });
-    };
-
-    const removeImageField = (index: number) => {
-        const newImages = formData.images.filter((_, i) => i !== index);
-        setFormData({ ...formData, images: newImages.length ? newImages : [''] });
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setSelectedFiles(Array.from(e.target.files));
+        }
     };
 
     const filteredProducts = products.filter(p =>
@@ -208,7 +208,11 @@ export default function AdminProductsPage() {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-14 h-14 rounded-xl bg-gray-800 border border-white/10 overflow-hidden">
                                                     {product.images[0] ? (
-                                                        <img src={product.images[0]} alt="" className="w-full h-full object-cover" />
+                                                        <img
+                                                            src={product.images[0].startsWith('http') ? product.images[0] : `http://localhost:8000${product.images[0]}`}
+                                                            alt=""
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center"><ImageIcon className="w-6 h-6 text-gray-600" /></div>
                                                     )}
@@ -315,25 +319,32 @@ export default function AdminProductsPage() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1 flex items-center justify-between">
-                                        Product Images (URLs)
-                                        <Button type="button" onClick={addImageField} variant="ghost" size="sm" className="h-6 text-[10px] text-blue-400 font-bold hover:bg-blue-400/10">
-                                            <Plus className="w-3 h-3 mr-1" /> Add Image
-                                        </Button>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">
+                                        Product Images
                                     </label>
-                                    <div className="space-y-3">
-                                        {formData.images.map((url, idx) => (
-                                            <div key={idx} className="flex gap-3">
-                                                <Input
-                                                    value={url}
-                                                    onChange={e => updateImageField(idx, e.target.value)}
-                                                    placeholder="https://..."
-                                                    className="h-10 bg-white/5 border-white/10 rounded-xl flex-1 text-xs"
-                                                />
-                                                <Button type="button" onClick={() => removeImageField(idx)} size="icon" variant="ghost" className="h-10 w-10 text-rose-500 hover:bg-rose-500/10"><Trash2 className="w-4 h-4" /></Button>
-                                            </div>
-                                        ))}
+                                    <div className="relative group cursor-pointer">
+                                        <input
+                                            type="file"
+                                            multiple
+                                            onChange={handleFileChange}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                        />
+                                        <div className="h-32 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center gap-2 group-hover:border-blue-500/50 transition-colors bg-white/5">
+                                            <Upload className="w-8 h-8 text-gray-500 group-hover:text-blue-400 transition-colors" />
+                                            <p className="text-xs text-gray-500 font-bold">
+                                                {selectedFiles.length > 0 ? `${selectedFiles.length} files selected` : "Drop files here or click to upload"}
+                                            </p>
+                                        </div>
                                     </div>
+                                    {selectedFiles.length > 0 && (
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedFiles.map((f, i) => (
+                                                <div key={i} className="px-3 py-1 bg-blue-600/20 text-blue-400 text-[10px] font-bold rounded-full border border-blue-600/30 uppercase">
+                                                    {f.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="pt-6 border-t border-white/5">

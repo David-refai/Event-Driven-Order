@@ -26,15 +26,18 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final FileStorageService fileStorageService;
 
     public ProductService(ProductRepository productRepository, 
                           CategoryRepository categoryRepository,
                           KafkaTemplate<String, String> kafkaTemplate,
-                          ObjectMapper objectMapper) {
+                          ObjectMapper objectMapper,
+                          FileStorageService fileStorageService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
+        this.fileStorageService = fileStorageService;
     }
 
     @Transactional(readOnly = true)
@@ -49,20 +52,36 @@ public class ProductService {
     }
 
     @Transactional
-    public Product createProduct(ProductRequest request) {
+    public Product createProduct(ProductRequest request, org.springframework.web.multipart.MultipartFile[] files) {
         Product product = new Product();
         mapRequestToProduct(request, product);
+        
+        if (files != null && files.length > 0) {
+            for (org.springframework.web.multipart.MultipartFile file : files) {
+                String fileName = fileStorageService.storeFile(file);
+                product.getImages().add("/uploads/" + fileName);
+            }
+        }
+        
         Product savedProduct = productRepository.save(product);
-        
         publishProductCreatedEvent(savedProduct);
-        
         return savedProduct;
     }
 
     @Transactional
-    public Product updateProduct(String id, ProductRequest request) {
+    public Product updateProduct(String id, ProductRequest request, org.springframework.web.multipart.MultipartFile[] files) {
         Product product = getProductById(id);
         mapRequestToProduct(request, product);
+        
+        if (files != null && files.length > 0) {
+            // Option: clear old images or append
+            // For now, let's append as the user says "add multiple images"
+            for (org.springframework.web.multipart.MultipartFile file : files) {
+                String fileName = fileStorageService.storeFile(file);
+                product.getImages().add("/uploads/" + fileName);
+            }
+        }
+        
         return productRepository.save(product);
     }
 

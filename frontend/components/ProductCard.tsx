@@ -37,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
                 {images.map((img, idx) => (
                     <img
                         key={idx}
-                        src={img}
+                        src={img.startsWith('http') ? img : `http://localhost:8000${img}`}
                         alt={product.name}
                         className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${idx === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                             }`}

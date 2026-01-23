@@ -16,7 +16,7 @@ spring:
         - id: product-service
           uri: http://product-service:8088
           predicates:
-            - Path=/api/products/**, /api/categories/**
+            - Path=/api/products/**, /api/categories/**, /uploads/**
         - id: order-service
           uri: http://order-service:8081
           predicates:
