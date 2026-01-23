@@ -14,6 +14,24 @@ export interface EventStat {
     count: number;
 }
 
+export interface Category {
+    id: number;
+    name: string;
+    description: string;
+}
+
+export interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    inventory: number;
+    images: string[];
+    category?: Category;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export interface HealthStatus {
     status: 'UP' | 'DOWN' | 'UNKNOWN';
 }
@@ -71,4 +89,61 @@ export const apiClient = {
             return { status: 'DOWN' };
         }
     },
+
+    // Product & Category APIs
+    async getProducts(): Promise<Product[]> {
+        const res = await fetch(`${API_BASE_URL}/api/products`);
+        if (!res.ok) throw new Error('Failed to fetch products');
+        return res.json();
+    },
+
+    async getProduct(id: string): Promise<Product> {
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}`);
+        if (!res.ok) throw new Error('Failed to fetch product');
+        return res.json();
+    },
+
+    async createProduct(data: Partial<Product>): Promise<Product> {
+        const res = await fetch(`${API_BASE_URL}/api/products`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error('Failed to create product');
+        return res.json();
+    },
+
+    async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error('Failed to update product');
+        return res.json();
+    },
+
+    async deleteProduct(id: string): Promise<void> {
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+        });
+        if (!res.ok) throw new Error('Failed to delete product');
+    },
+
+    async getCategories(): Promise<Category[]> {
+        const res = await fetch(`${API_BASE_URL}/api/categories`);
+        if (!res.ok) throw new Error('Failed to fetch categories');
+        return res.json();
+    },
+
+    async createCategory(data: Partial<Category>): Promise<Category> {
+        const res = await fetch(`${API_BASE_URL}/api/categories`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error('Failed to create category');
+        return res.json();
+    }
 };

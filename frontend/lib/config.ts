@@ -12,4 +12,5 @@ export const SERVICES = [
     { name: 'Payment Service', url: 'http://localhost:8083', port: 8083 },
     { name: 'Notification Service', url: 'http://localhost:8084', port: 8084 },
     { name: 'Analytics Service', url: 'http://localhost:8085', port: 8085 },
+    { name: 'Product Service', url: 'http://localhost:8087', port: 8087 },
 ] as const;

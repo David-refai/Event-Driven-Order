@@ -55,6 +55,7 @@ export default function Navbar() {
                 {/* Main Links */}
                 <div className="hidden lg:flex items-center gap-10">
                     <Link href="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Home</Link>
+                    <Link href="/products" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">All Products</Link>
 
                     {/* Products Mega Menu Trigger */}
                     <div

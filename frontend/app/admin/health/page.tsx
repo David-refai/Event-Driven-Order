@@ -29,6 +29,7 @@ export default function HealthPage() {
         { name: 'Inventory Service', url: `${API_BASE_URL}/health/inventory`, port: 8082 },
         { name: 'Payment Service', url: `${API_BASE_URL}/health/payments`, port: 8083 },
         { name: 'Analytics Service', url: `${API_BASE_URL}/health/analytics`, port: 8085 },
+        { name: 'Product Service', url: `${API_BASE_URL}/health/products`, port: 8087 },
     ];
 
     const checkAllHealth = async () => {

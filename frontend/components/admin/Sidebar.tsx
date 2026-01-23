@@ -15,6 +15,7 @@ export const Sidebar = () => {
         { name: 'Users', href: '/admin/users', icon: '👥' },
         { name: 'Orders', href: '/admin/orders', icon: '📦' },
         { name: 'Analytics', href: '/admin/analytics', icon: '📈' },
+        { name: 'Products', href: '/admin/products', icon: '🏷️' },
         { name: 'Health', href: '/admin/health', icon: '🏥' },
     ];
 

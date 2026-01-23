@@ -20,17 +20,19 @@ public class AnalyticsConsumer {
     }
 
     @KafkaListener(topics = {
-        KafkaConstants.ORDER_EVENTS_TOPIC,
-        KafkaConstants.INVENTORY_EVENTS_TOPIC,
-        KafkaConstants.PAYMENT_EVENTS_TOPIC
+            KafkaConstants.ORDER_EVENTS_TOPIC,
+            KafkaConstants.INVENTORY_EVENTS_TOPIC,
+            KafkaConstants.PAYMENT_EVENTS_TOPIC,
+            KafkaConstants.PRODUCT_EVENTS_TOPIC
     }, groupId = "analytics-service-group")
     @Transactional
-    public void consumeAllEvents(String message, @org.springframework.messaging.handler.annotation.Header(org.springframework.kafka.support.KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    public void consumeAllEvents(String message,
+            @org.springframework.messaging.handler.annotation.Header(org.springframework.kafka.support.KafkaHeaders.RECEIVED_TOPIC) String topic) {
         log.info("Analytics received event from topic: {}", topic);
-        
+
         EventStat stat = repository.findById(topic)
-            .orElse(new EventStat(topic, 0L));
-        
+                .orElse(new EventStat(topic, 0L));
+
         stat.setCount(stat.getCount() + 1);
         repository.save(stat);
     }

@@ -77,6 +77,22 @@ services:
       kafka:
         condition: service_healthy
 
+  product-service:
+    build:
+      context: ./backend
+      dockerfile: product-service/Dockerfile
+    ports:
+      - "8087:8087"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SERVER_PORT: 8087
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
   payment-service:
     build: ./backend/payment-service
     ports:
@@ -140,9 +156,9 @@ services:
     ports:
       - "8000:8080"
     depends_on:
-      - auth-service
       - order-service
       - inventory-service
+      - product-service
       - payment-service
       - analytics-service
 
