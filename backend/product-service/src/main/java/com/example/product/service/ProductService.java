@@ -114,7 +114,12 @@ public class ProductService {
         product.setDescription(request.description());
         product.setPrice(request.price());
         product.setInitialInventory(request.inventory());
-        product.setImages(request.images());
+        
+        if (request.images() != null) {
+            product.setImages(new java.util.ArrayList<>(request.images()));
+        } else if (product.getImages() == null) {
+            product.setImages(new java.util.ArrayList<>());
+        }
         
         if (request.categoryId() != null) {
             Category category = categoryRepository.findById(request.categoryId())

@@ -35,21 +35,30 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authorizeExchange(exchange -> exchange
-                .pathMatchers(org.springframework.http.HttpMethod.OPTIONS).permitAll()
-                .pathMatchers("/auth/**").permitAll()
-                .pathMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
-                .pathMatchers("/health/**").hasAuthority("ROLE_ADMIN")
-                .pathMatchers("/api/analytics/**").hasAuthority("ROLE_ADMIN")
-                .anyExchange().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt
-                    .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                    .jwtDecoder(jwtDecoder())
-                ));
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeExchange(exchange -> exchange
+                        .pathMatchers(org.springframework.http.HttpMethod.OPTIONS).permitAll()
+                        .pathMatchers("/auth/**").permitAll()
+                        .pathMatchers(org.springframework.http.HttpMethod.GET, "/api/products/**", "/api/categories/**",
+                                "/uploads/**")
+                        .permitAll()
+                        .pathMatchers(org.springframework.http.HttpMethod.POST, "/api/products/**",
+                                "/api/categories/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.PUT, "/api/products/**", "/api/categories/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .pathMatchers(org.springframework.http.HttpMethod.DELETE, "/api/products/**",
+                                "/api/categories/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .pathMatchers("/actuator/**").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers("/health/**").hasAuthority("ROLE_ADMIN")
+                        .pathMatchers("/api/analytics/**").hasAuthority("ROLE_ADMIN")
+                        .anyExchange().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
+                                .jwtDecoder(jwtDecoder())));
         return http.build();
     }
 
@@ -72,13 +81,15 @@ public class SecurityConfig {
             if (roles instanceof String) {
                 return Arrays.stream(((String) roles).split(","))
                         .map(role -> role.trim())
-                        .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
+                        .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                role.startsWith("ROLE_") ? role : "ROLE_" + role))
                         .collect(java.util.stream.Collectors.toList());
             } else if (roles instanceof java.util.Collection) {
                 return ((java.util.Collection<?>) roles).stream()
                         .map(Object::toString)
                         .map(role -> role.trim())
-                        .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
+                        .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                role.startsWith("ROLE_") ? role : "ROLE_" + role))
                         .collect(java.util.stream.Collectors.toList());
             }
             return java.util.Collections.emptyList();
@@ -94,7 +105,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
