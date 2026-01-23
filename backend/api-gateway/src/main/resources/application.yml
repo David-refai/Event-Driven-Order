@@ -67,7 +67,7 @@ spring:
             - SetPath=/actuator/health
         - id: product-service-health
           uri: http://product-service:8088
-福利          predicates:
+          predicates:
             - Path=/health/products
           filters:
             - SetPath=/actuator/health
