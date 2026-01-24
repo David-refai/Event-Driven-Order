@@ -4,11 +4,12 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck, XCircle, Loader2, Zap } from 'lucide-react';
-import Link from 'next/link';
+import { useAuthModal } from '@/contexts/AuthModalContext';
 
 function VerifyEmailContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { openLogin, setMode } = useAuthModal();
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('Verifying your email...');
 
@@ -70,8 +71,16 @@ function VerifyEmailContent() {
                         </div>
                         <h1 className="text-3xl font-bold text-white">Verification Success!</h1>
                         <p className="text-gray-400">{message}</p>
-                        <Button asChild className="w-full h-14 bg-white text-black hover:bg-gray-100 font-bold rounded-2xl">
-                            <Link href="/login">Go to Login</Link>
+                        <Button
+                            onClick={() => {
+                                router.push('/');
+                                setTimeout(() => {
+                                    openLogin();
+                                }, 500);
+                            }}
+                            className="w-full h-14 bg-white text-black hover:bg-gray-100 font-bold rounded-2xl"
+                        >
+                            Go to Login
                         </Button>
                     </div>
                 )}
@@ -83,8 +92,12 @@ function VerifyEmailContent() {
                         </div>
                         <h1 className="text-3xl font-bold text-white">Verification Failed</h1>
                         <p className="text-gray-400">{message}</p>
-                        <Button asChild variant="outline" className="w-full h-14 border-white/10 text-white hover:bg-white/5 rounded-2xl font-bold">
-                            <Link href="/register">Back to Sign Up</Link>
+                        <Button
+                            onClick={() => router.push('/')}
+                            variant="outline"
+                            className="w-full h-14 border-white/10 text-white hover:bg-white/5 rounded-2xl font-bold"
+                        >
+                            Back to Home
                         </Button>
                     </div>
                 )}

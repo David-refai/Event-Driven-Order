@@ -139,6 +139,8 @@ services:
       - "8086:8086"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-633665226833-skaea0geb8d6l0rsfenptoofom4v13tm.apps.googleusercontent.com}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-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}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - .:/project:ro

@@ -94,15 +94,15 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         }
 
         String roles = user.getRoles().stream()
-                .map(r -> r.getName().name())
+                .map(role -> role.getName().name())
                 .collect(Collectors.joining(","));
 
-        String token = tokenProvider.generateTokenFromUsername(user.getUsername(), roles);
+        String jwtToken = tokenProvider.generateTokenFromUsername(user.getUsername(), roles);
+        System.out.println("Generated JWT token for OAuth2 user: " + user.getUsername());
 
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/")
-                .queryParam("token", token)
-                .build().toUriString();
-
-        getRedirectStrategy().sendRedirect(request, response, targetUrl);
+        // Redirect to frontend with token and oauth=true parameter
+        String redirectUrl = String.format("http://localhost:3000?token=%s&oauth=true", jwtToken);
+        System.out.println("Redirecting to: " + redirectUrl);
+        response.sendRedirect(redirectUrl);
     }
 }

@@ -59,10 +59,30 @@ export default function AuthModal() {
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // Validation
+        if (username.length < 3) {
+            setError('Username must be at least 3 characters long');
+            return;
+        }
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Password must be at least 6 characters long');
+            return;
+        }
+
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return;
         }
+
         setIsLoading(true);
         try {
             await register(username, email, password);
@@ -121,6 +141,7 @@ export default function AuthModal() {
                                             className="h-12 bg-white/5 border-white/10 text-white rounded-xl pl-11 focus:ring-2 focus:ring-blue-500/50 transition-all"
                                             value={username}
                                             onChange={(e) => setUsername(e.target.value)}
+                                            minLength={3}
                                             required
                                         />
                                     </div>
@@ -135,6 +156,7 @@ export default function AuthModal() {
                                             className="h-12 bg-white/5 border-white/10 text-white rounded-xl pl-11 focus:ring-2 focus:ring-blue-500/50 transition-all"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
+                                            pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
                                             required
                                         />
                                     </div>
@@ -169,6 +191,7 @@ export default function AuthModal() {
                                     className="h-12 bg-white/5 border-white/10 text-white rounded-xl pl-11 focus:ring-2 focus:ring-blue-500/50 transition-all"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    minLength={6}
                                     required
                                 />
                             </div>

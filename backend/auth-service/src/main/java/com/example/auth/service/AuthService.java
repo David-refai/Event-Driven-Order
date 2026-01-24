@@ -205,4 +205,88 @@ public class AuthService {
 
                 return new JwtResponse("", "", user.getUsername(), user.getEmail(), user.getProfilePicture(), roles);
         }
+
+        public JwtResponse updateProfile(com.example.auth.dto.UpdateProfileRequest request) {
+                System.out.println("AuthService.updateProfile() called");
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String currentUsername = authentication.getName();
+
+                User user = userRepository.findByUsername(currentUsername)
+                                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+                if (request.username() != null && !request.username().equals(currentUsername)) {
+                        if (userRepository.existsByUsername(request.username())) {
+                                throw new RuntimeException("Error: Username is already taken!");
+                        }
+                        user.setUsername(request.username());
+                }
+
+                if (request.email() != null && !request.email().equals(user.getEmail())) {
+                        if (userRepository.findByEmail(request.email()).isPresent()) {
+                                throw new RuntimeException("Error: Email is already in use!");
+                        }
+                        user.setEmail(request.email());
+                }
+
+                if (request.profilePicture() != null) {
+                        user.setProfilePicture(request.profilePicture());
+                }
+
+                userRepository.save(user);
+                System.out.println("Profile updated for user: " + user.getUsername());
+
+                List<String> roles = user.getRoles().stream()
+                                .map(role -> role.getName().name())
+                                .collect(Collectors.toList());
+
+                return new JwtResponse("", "", user.getUsername(), user.getEmail(), user.getProfilePicture(), roles);
+        }
+
+        public void changePassword(com.example.auth.dto.ChangePasswordRequest request) {
+                System.out.println("AuthService.changePassword() called");
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String username = authentication.getName();
+
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+                if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+                        throw new RuntimeException("Error: Current password is incorrect!");
+                }
+
+                user.setPassword(passwordEncoder.encode(request.newPassword()));
+                userRepository.save(user);
+                System.out.println("Password changed for user: " + username);
+        }
+
+        public void updatePreferences(com.example.auth.dto.UserPreferencesRequest request) {
+                System.out.println("AuthService.updatePreferences() called");
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String username = authentication.getName();
+
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+                try {
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        String preferencesJson = mapper.writeValueAsString(request);
+                        user.setPreferences(preferencesJson);
+                        userRepository.save(user);
+                        System.out.println("Preferences updated for user: " + username);
+                } catch (Exception e) {
+                        throw new RuntimeException("Error: Failed to save preferences - " + e.getMessage());
+                }
+        }
+
+        public void deleteAccount() {
+                System.out.println("AuthService.deleteAccount() called");
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                String username = authentication.getName();
+
+                User user = userRepository.findByUsername(username)
+                                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+                userRepository.delete(user);
+                System.out.println("Account deleted for user: " + username);
+        }
 }

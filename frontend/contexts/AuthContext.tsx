@@ -18,6 +18,10 @@ interface AuthContextType {
     register: (username: string, email: string, password: string) => Promise<void>;
     logout: () => void;
     refreshToken: () => Promise<void>;
+    updateProfile: (username: string, email: string, profilePicture?: string) => Promise<User>;
+    changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+    updatePreferences: (preferences: any) => Promise<void>;
+    deleteAccount: () => Promise<void>;
     isAuthenticated: boolean;
     isLoading: boolean;
 }
@@ -69,21 +73,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const searchParams = useSearchParams();
 
         useEffect(() => {
+            // Only handle OAuth tokens that come with a specific parameter
+            // Verification tokens should NOT be saved to localStorage
             const handleUrlToken = async () => {
                 const urlToken = searchParams.get('token');
-                if (urlToken) {
-                    console.log('Detected token in URL, initializing OAuth session...');
+                const isOAuthCallback = searchParams.get('oauth') === 'true';
+
+                if (urlToken && isOAuthCallback) {
+                    console.log('Detected OAuth token in URL, initializing session...');
                     setToken(urlToken);
-                    localStorage.setItem('token', urlToken);
 
                     const success = await fetchCurrentUser(urlToken);
                     if (success) {
+                        // Only save to localStorage if it's a valid JWT token (OAuth)
+                        localStorage.setItem('token', urlToken);
                         const newUrl = window.location.pathname;
                         window.history.replaceState({}, '', newUrl);
                         // Force reload to ensure UI updates
                         window.location.reload();
                     } else {
                         console.error('Failed to fetch current user with OAuth token');
+                        setToken(null);
+                        localStorage.removeItem('token');
                     }
                 }
             };
@@ -149,8 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             throw new Error(error.message || 'Registration failed');
         }
 
-        // Auto-login after registration
-        await login(username, password);
+        // Don't auto-login - user needs to verify email first
     };
 
     const refreshToken = async () => {
@@ -234,6 +244,81 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, [token]);
 
+    const updateProfile = async (username: string, email: string, profilePicture?: string): Promise<User> => {
+        const response = await fetch(`${AUTH_URL}/auth/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ username, email, profilePicture }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update profile');
+        }
+
+        const data = await response.json();
+        const userData: User = {
+            username: data.username,
+            email: data.email,
+            profilePicture: data.profilePicture,
+            roles: data.roles,
+        };
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        return userData;
+    };
+
+    const changePassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+        const response = await fetch(`${AUTH_URL}/auth/password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ currentPassword, newPassword }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to change password');
+        }
+    };
+
+    const updatePreferences = async (preferences: any): Promise<void> => {
+        const response = await fetch(`${AUTH_URL}/auth/preferences`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(preferences),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update preferences');
+        }
+    };
+
+    const deleteAccount = async (): Promise<void> => {
+        const response = await fetch(`${AUTH_URL}/auth/account`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to delete account');
+        }
+
+        logout();
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -243,6 +328,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 register,
                 logout,
                 refreshToken,
+                updateProfile,
+                changePassword,
+                updatePreferences,
+                deleteAccount,
                 isAuthenticated: !!token,
                 isLoading,
             }}
