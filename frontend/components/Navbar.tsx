@@ -24,7 +24,7 @@ export default function Navbar() {
             items: [
                 { name: "Electronics", desc: "Latest gadgets and gear", icon: Zap },
                 { name: "Fashion", desc: "Trendy apparel & accessories", icon: Package },
-                { name: "Home & Living", desc: "Stylish decor & furniture", icon: Globe },
+                { name: "Home & Garden", desc: "Stylish decor & furniture", icon: Globe },
                 { name: "Health & Beauty", desc: "Skincare & wellness", icon: Shield }
             ]
         },
@@ -80,7 +80,7 @@ export default function Navbar() {
                                                 {cat.items.map((item) => (
                                                     <Link
                                                         key={item.name}
-                                                        href={`/products/${item.name.toLowerCase().replace(' ', '-')}`}
+                                                        href={`/products?category=${encodeURIComponent(item.name)}`}
                                                         className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all group/item"
                                                     >
                                                         <div className="p-3 bg-gray-800/50 rounded-xl group-hover/item:scale-110 transition-transform">

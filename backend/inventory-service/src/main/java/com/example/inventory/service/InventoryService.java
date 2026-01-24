@@ -36,6 +36,15 @@ public class InventoryService {
     }
 
     @Transactional
+    public void setInventory(String productId, Integer quantity) {
+        ProductInventory inventory = inventoryRepository.findById(productId)
+                .orElseGet(() -> new ProductInventory(productId, 0));
+        inventory.setAvailableQuantity(quantity);
+        inventoryRepository.save(inventory);
+        log.info("Reset inventory for product: {} to quantity: {}", productId, quantity);
+    }
+
+    @Transactional
     public void processOrderCreated(BaseEvent<OrderCreatedEvent> event) {
         log.info("Processing order created event in inventory: {}", event.eventId());
         event.payload().items().forEach(item -> {

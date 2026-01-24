@@ -54,6 +54,7 @@ export const apiClient = {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(data),
+            credentials: 'include',
         });
         if (!res.ok) {
             if (res.status === 401 || res.status === 403) {
@@ -67,6 +68,7 @@ export const apiClient = {
     async getOrder(orderId: string): Promise<Order> {
         const res = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
             headers: getAuthHeaders(),
+            credentials: 'include',
         });
         if (!res.ok) {
             if (res.status === 401 || res.status === 403) {
@@ -95,13 +97,17 @@ export const apiClient = {
 
     // Product & Category APIs
     async getProducts(): Promise<Product[]> {
-        const res = await fetch(`${API_BASE_URL}/api/products`);
+        const res = await fetch(`${API_BASE_URL}/api/products`, {
+            credentials: 'include'
+        });
         if (!res.ok) throw new Error('Failed to fetch products');
         return res.json();
     },
 
     async getProduct(id: string): Promise<Product> {
-        const res = await fetch(`${API_BASE_URL}/api/products/${id}`);
+        const res = await fetch(`${API_BASE_URL}/api/products/${id}`, {
+            credentials: 'include'
+        });
         if (!res.ok) throw new Error('Failed to fetch product');
         return res.json();
     },
@@ -111,6 +117,7 @@ export const apiClient = {
             method: 'POST',
             headers: getAuthHeaders(true),
             body: data,
+            credentials: 'include',
         });
         if (!res.ok) throw new Error('Failed to create product');
         return res.json();
@@ -121,6 +128,7 @@ export const apiClient = {
             method: 'PUT',
             headers: getAuthHeaders(true),
             body: data,
+            credentials: 'include',
         });
         if (!res.ok) throw new Error('Failed to update product');
         return res.json();
@@ -135,7 +143,9 @@ export const apiClient = {
     },
 
     async getCategories(): Promise<Category[]> {
-        const res = await fetch(`${API_BASE_URL}/api/categories`);
+        const res = await fetch(`${API_BASE_URL}/api/categories`, {
+            credentials: 'include'
+        });
         if (!res.ok) throw new Error('Failed to fetch categories');
         return res.json();
     },
@@ -145,6 +155,7 @@ export const apiClient = {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(data),
+            credentials: 'include',
         });
         if (!res.ok) throw new Error('Failed to create category');
         return res.json();

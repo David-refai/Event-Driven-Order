@@ -6,8 +6,13 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import { apiClient, Product, Category } from '@/lib/api';
 import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function ProductsPage() {
+function ProductsContent() {
+    const searchParams = useSearchParams();
+    const urlCategory = searchParams.get('category');
+
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -23,6 +28,16 @@ export default function ProductsPage() {
                 ]);
                 setProducts(productsData);
                 setCategories(categoriesData);
+
+                // Handle URL category if present
+                if (urlCategory && categoriesData.length > 0) {
+                    const found = categoriesData.find(
+                        c => c.name.toLowerCase() === urlCategory.toLowerCase()
+                    );
+                    if (found) {
+                        setSelectedCategory(found.id.toString());
+                    }
+                }
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             } finally {
@@ -30,7 +45,7 @@ export default function ProductsPage() {
             }
         };
         fetchData();
-    }, []);
+    }, [urlCategory]);
 
     const filteredProducts = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,8 +94,8 @@ export default function ProductsPage() {
                         <button
                             onClick={() => setSelectedCategory('all')}
                             className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === 'all'
-                                    ? 'bg-white text-black shadow-lg shadow-white/10'
-                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                ? 'bg-white text-black shadow-lg shadow-white/10'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                         >
                             All Products
@@ -88,10 +103,10 @@ export default function ProductsPage() {
                         {categories.map(cat => (
                             <button
                                 key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id.toString())}
-                                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === cat.id.toString()
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
-                                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                onClick={() => setSelectedCategory(cat.id?.toString() || '')}
+                                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${selectedCategory === cat.id?.toString()
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                     }`}
                             >
                                 {cat.name}
@@ -134,5 +149,26 @@ export default function ProductsPage() {
 
             <Footer />
         </main>
+    );
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={
+            <main className="min-h-screen bg-gray-950 text-white font-outfit">
+                <Navbar />
+                <div className="pt-32 px-6 max-w-7xl mx-auto">
+                    <div className="h-20 w-1/2 bg-white/5 rounded-2xl animate-pulse mb-8" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="h-[500px] bg-white/5 rounded-[32px] animate-pulse" />
+                        ))}
+                    </div>
+                </div>
+                <Footer />
+            </main>
+        }>
+            <ProductsContent />
+        </Suspense>
     );
 }

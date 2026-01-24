@@ -87,6 +87,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SERVER_PORT: 8088
+    volumes:
+      - product_uploads:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -183,3 +185,4 @@ services:
 
 volumes:
   postgres_data:
+  product_uploads:

@@ -28,11 +28,11 @@ public class ProductService {
     private final ObjectMapper objectMapper;
     private final FileStorageService fileStorageService;
 
-    public ProductService(ProductRepository productRepository, 
-                          CategoryRepository categoryRepository,
-                          KafkaTemplate<String, String> kafkaTemplate,
-                          ObjectMapper objectMapper,
-                          FileStorageService fileStorageService) {
+    public ProductService(ProductRepository productRepository,
+            CategoryRepository categoryRepository,
+            KafkaTemplate<String, String> kafkaTemplate,
+            ObjectMapper objectMapper,
+            FileStorageService fileStorageService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.kafkaTemplate = kafkaTemplate;
@@ -55,24 +55,25 @@ public class ProductService {
     public Product createProduct(ProductRequest request, org.springframework.web.multipart.MultipartFile[] files) {
         Product product = new Product();
         mapRequestToProduct(request, product);
-        
+
         if (files != null && files.length > 0) {
             for (org.springframework.web.multipart.MultipartFile file : files) {
                 String fileName = fileStorageService.storeFile(file);
                 product.getImages().add("/uploads/" + fileName);
             }
         }
-        
+
         Product savedProduct = productRepository.save(product);
         publishProductCreatedEvent(savedProduct);
         return savedProduct;
     }
 
     @Transactional
-    public Product updateProduct(String id, ProductRequest request, org.springframework.web.multipart.MultipartFile[] files) {
+    public Product updateProduct(String id, ProductRequest request,
+            org.springframework.web.multipart.MultipartFile[] files) {
         Product product = getProductById(id);
         mapRequestToProduct(request, product);
-        
+
         if (files != null && files.length > 0) {
             // Option: clear old images or append
             // For now, let's append as the user says "add multiple images"
@@ -81,8 +82,10 @@ public class ProductService {
                 product.getImages().add("/uploads/" + fileName);
             }
         }
-        
-        return productRepository.save(product);
+
+        Product savedProduct = productRepository.save(product);
+        publishProductUpdatedEvent(savedProduct);
+        return savedProduct;
     }
 
     @Transactional
@@ -91,18 +94,34 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    private void publishProductUpdatedEvent(Product product) {
+        try {
+            String correlationId = CorrelationIdUtils.getCorrelationId();
+            BaseEvent<ProductCreatedEventPayload> event = BaseEvent.create(
+                    KafkaConstants.PRODUCT_UPDATED_V1,
+                    new ProductCreatedEventPayload(product.getId(), product.getInitialInventory()),
+                    correlationId);
+
+            kafkaTemplate.send(KafkaConstants.PRODUCT_EVENTS_TOPIC, product.getId(),
+                    objectMapper.writeValueAsString(event));
+
+            log.info("Published ProductUpdatedEvent for product: {}", product.getId());
+        } catch (JsonProcessingException e) {
+            log.error("Failed to publish ProductUpdatedEvent", e);
+        }
+    }
+
     private void publishProductCreatedEvent(Product product) {
         try {
             String correlationId = CorrelationIdUtils.getCorrelationId();
             BaseEvent<ProductCreatedEventPayload> event = BaseEvent.create(
-                KafkaConstants.PRODUCT_CREATED_V1,
-                new ProductCreatedEventPayload(product.getId(), product.getInitialInventory()),
-                correlationId
-            );
-            
-            kafkaTemplate.send(KafkaConstants.PRODUCT_EVENTS_TOPIC, product.getId(), 
-                objectMapper.writeValueAsString(event));
-            
+                    KafkaConstants.PRODUCT_CREATED_V1,
+                    new ProductCreatedEventPayload(product.getId(), product.getInitialInventory()),
+                    correlationId);
+
+            kafkaTemplate.send(KafkaConstants.PRODUCT_EVENTS_TOPIC, product.getId(),
+                    objectMapper.writeValueAsString(event));
+
             log.info("Published ProductCreatedEvent for product: {}", product.getId());
         } catch (JsonProcessingException e) {
             log.error("Failed to publish ProductCreatedEvent", e);
@@ -114,13 +133,18 @@ public class ProductService {
         product.setDescription(request.description());
         product.setPrice(request.price());
         product.setInitialInventory(request.inventory());
-        
+
         if (request.images() != null) {
-            product.setImages(new java.util.ArrayList<>(request.images()));
+            if (product.getImages() == null) {
+                product.setImages(new java.util.ArrayList<>(request.images()));
+            } else {
+                product.getImages().clear();
+                product.getImages().addAll(request.images());
+            }
         } else if (product.getImages() == null) {
             product.setImages(new java.util.ArrayList<>());
         }
-        
+
         if (request.categoryId() != null) {
             Category category = categoryRepository.findById(request.categoryId())
                     .orElseThrow(() -> new RuntimeException("Category not found with id: " + request.categoryId()));
@@ -128,5 +152,6 @@ public class ProductService {
         }
     }
 
-    public record ProductCreatedEventPayload(String productId, Integer initialQuantity) {}
+    public record ProductCreatedEventPayload(String productId, Integer initialQuantity) {
+    }
 }
