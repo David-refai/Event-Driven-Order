@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { StatusProvider } from '@/contexts/StatusContext';
+
+import { AuthModalProvider } from '@/contexts/AuthModalContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient({
@@ -18,9 +21,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
-                <CartProvider>
-                    {children}
-                </CartProvider>
+                <AuthModalProvider>
+                    <CartProvider>
+                        <StatusProvider>
+                            {children}
+                        </StatusProvider>
+                    </CartProvider>
+                </AuthModalProvider>
             </AuthProvider>
         </QueryClientProvider>
     );

@@ -6,10 +6,14 @@ import { ShoppingCart, ChevronLeft, ChevronRight, Heart, Star } from 'lucide-rea
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistQuery } from '@/hooks/useWishlistQuery';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function ProductCard({ product }: { product: Product }) {
     const { addToCart } = useCart();
     const { wishlist, addToWishlist, removeFromWishlist } = useWishlistQuery();
+    const { isAuthenticated } = useAuth();
+    const router = useRouter();
 
     // Check if item is in wishlist
     const isWishlisted = wishlist?.items?.some(item => item.productId === product.id);
@@ -17,6 +21,12 @@ export default function ProductCard({ product }: { product: Product }) {
     const toggleWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+
+        if (!isAuthenticated) {
+            router.push('/login');
+            return;
+        }
+
         if (isWishlisted) {
             removeFromWishlist(product.id);
         } else {
@@ -135,6 +145,10 @@ export default function ProductCard({ product }: { product: Product }) {
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
+                            if (!isAuthenticated) {
+                                router.push('/login');
+                                return;
+                            }
                             addToCart(product);
                         }}
                         className="flex-1 bg-white text-black h-12 rounded-2xl font-bold text-sm hover:bg-blue-500 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2"

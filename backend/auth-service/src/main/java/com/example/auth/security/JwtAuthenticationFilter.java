@@ -29,11 +29,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        System.out.println("Filter: Request to " + request.getRequestURI() + " from " + request.getRemoteAddr());
         try {
             String jwt = getJwtFromRequest(request);
+            System.out.println(
+                    "Filter: Extracted JWT: " + (jwt != null ? "Present (length: " + jwt.length() + ")" : "NULL"));
 
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+                System.out.println("Filter: JWT is valid");
                 String username = tokenProvider.getUsernameFromToken(jwt);
+                System.out.println("Filter: Username from JWT: " + username);
 
                 // Extract roles from JWT claims
                 // Note: Auth Service JwtTokenProvider stores roles as a comma-separated String
@@ -45,6 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .getPayload();
 
                 String rolesString = claims.get("roles", String.class);
+                System.out.println("Filter: Roles from JWT: " + rolesString);
                 List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesString.split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
@@ -54,8 +60,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                System.out.println("Filter: Authentication set in SecurityContext for user: " + username);
+            } else {
+                System.out.println("Filter: JWT is invalid or not present");
             }
         } catch (Exception ex) {
+            System.err.println("Filter: Error processing JWT: " + ex.getMessage());
             logger.error("Could not set user authentication in security context", ex);
         }
 
@@ -66,6 +76,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
+        }
+        // Fallback to token query parameter for SSE/EventSource
+        String tokenParam = request.getParameter("token");
+        if (StringUtils.hasText(tokenParam)) {
+            return tokenParam;
         }
         return null;
     }

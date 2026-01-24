@@ -30,21 +30,29 @@ public class RoleDataLoader implements CommandLineRunner {
             }
         }
 
-        // Initialize admin user if it doesn't exist
-        if (!userRepository.existsByUsername("admin")) {
-            com.example.auth.entity.User admin = new com.example.auth.entity.User(
-                    "admin",
-                    "admin@example.com",
-                    passwordEncoder.encode("password123"));
+        // Initialize admin user if it doesn't exist or ensure password is correct
+        userRepository.findByUsername("admin").ifPresentOrElse(
+                admin -> {
+                    admin.setPassword(passwordEncoder.encode("password123"));
+                    admin.setEnabled(true);
+                    userRepository.save(admin);
+                    System.out.println("Updated admin user password");
+                },
+                () -> {
+                    com.example.auth.entity.User admin = new com.example.auth.entity.User(
+                            "admin",
+                            "admin@example.com",
+                            passwordEncoder.encode("password123"));
 
-            java.util.Set<Role> roles = new java.util.HashSet<>();
-            Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(adminRole);
-            admin.setRoles(roles);
+                    java.util.Set<Role> roles = new java.util.HashSet<>();
+                    Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    roles.add(adminRole);
+                    admin.setRoles(roles);
+                    admin.setEnabled(true);
 
-            userRepository.save(admin);
-            System.out.println("Seeded admin user: admin / password123");
-        }
+                    userRepository.save(admin);
+                    System.out.println("Seeded admin user: admin / password123");
+                });
     }
 }

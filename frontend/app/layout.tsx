@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Next-generation Event-Driven Order Processing System",
 };
 
+import AuthModal from "@/components/auth/AuthModal";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -20,6 +22,7 @@ export default function RootLayout({
         className={`antialiased min-h-screen bg-gray-950 flex flex-col selection:bg-blue-500/30 selection:text-blue-200`}
       >
         <Providers>
+          <AuthModal />
           <Navbar />
           <main className="flex-1 pt-24">
             {children}

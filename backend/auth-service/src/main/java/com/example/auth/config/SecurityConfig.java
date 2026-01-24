@@ -25,21 +25,22 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
+    private final com.example.auth.security.CustomOAuth2SuccessHandler oAuth2SuccessHandler;
+    private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+            com.example.auth.security.CustomOAuth2SuccessHandler oAuth2SuccessHandler,
+            PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 
@@ -59,10 +60,21 @@ public class SecurityConfig {
             com.example.auth.security.JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/docker/events").permitAll()
+                        .requestMatchers("/auth/me").authenticated()
                         .requestMatchers("/auth/**", "/actuator/**").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers("/auth/forgot-password/**", "/auth/reset-password/**", "/auth/verify-email/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/auth/oauth2/authorization"))
+                        .redirectionEndpoint(redirection -> redirection
+                                .baseUri("/auth/login/oauth2/code/*"))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureUrl("/auth/oauth2/failure"));
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter,

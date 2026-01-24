@@ -8,8 +8,10 @@ public record JwtResponse(
         String refreshToken,
         String username,
         String email,
+        String profilePicture,
         List<String> roles) {
-    public JwtResponse(String token, String refreshToken, String username, String email, List<String> roles) {
-        this(token, "Bearer", refreshToken, username, email, roles);
+    public JwtResponse(String token, String refreshToken, String username, String email, String profilePicture,
+            List<String> roles) {
+        this(token, "Bearer", refreshToken, username, email, profilePicture, roles);
     }
 }

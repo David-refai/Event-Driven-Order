@@ -13,6 +13,8 @@ spring:
           uri: http://auth-service:8086
           predicates:
             - Path=/auth/**, /users/**
+          filters:
+            - PreserveHostHeader
         - id: product-service
           uri: http://product-service:8088
           predicates:

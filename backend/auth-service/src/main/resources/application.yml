@@ -1,11 +1,12 @@
 server:
   port: 8086
+  forward-headers-strategy: framework
 
 spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db
+    url: jdbc:postgresql://postgres:5432/auth_db
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -16,6 +17,24 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  mail:
+    host: mailhog
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+            scope: profile, email
+            redirect-uri: http://localhost:8000/auth/login/oauth2/code/google
 
 management:
   endpoints:
@@ -25,9 +44,15 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    mail:
+      enabled: false
 
 # JWT Configuration
 jwt:
   secret: M/wZlUpJUUTKSwRfDkPgLHCwalDUxt/hEx/tgtaxWoA=
   expiration: 86400000 # 24 hours
   refresh-expiration: 86400000 # 24 hours
+# Admin Configuration
+admin:
+  promotion-key: admin_secret_key_change_me

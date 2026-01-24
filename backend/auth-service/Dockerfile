@@ -11,5 +11,6 @@ RUN mvn clean package -pl auth-service -am -DskipTests
 # Run stage
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
+RUN apk add --no-cache docker-cli
 COPY --from=build /app/auth-service/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]

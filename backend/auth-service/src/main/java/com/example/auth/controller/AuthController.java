@@ -85,4 +85,54 @@ public class AuthController {
                 .header(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new MessageResponse("Log out successful!"));
     }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        try {
+            authService.verifyEmail(token);
+            return ResponseEntity.ok(new MessageResponse("Email verified successfully!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        try {
+            authService.forgotPassword(email);
+            return ResponseEntity.ok(new MessageResponse("Password reset email sent!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request.token(), request.newPassword());
+            return ResponseEntity.ok(new MessageResponse("Password reset successful!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/promote")
+    public ResponseEntity<?> promoteToAdmin(@RequestBody PromotionRequest request) {
+        try {
+            authService.promoteToAdmin(request);
+            return ResponseEntity.ok(new MessageResponse("User promoted to ADMIN successfully!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        try {
+            JwtResponse user = authService.getCurrentUser();
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
 }

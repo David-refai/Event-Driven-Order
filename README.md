@@ -436,3 +436,12 @@ docker compose logs -f
 +
 +</div>
 +
+
+```
+curl -X POST http://localhost:8000/auth/promote \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "secretKey": "admin_secret_key_change_me"
+  }'
+```

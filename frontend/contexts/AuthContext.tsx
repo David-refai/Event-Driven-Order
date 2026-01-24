@@ -1,11 +1,13 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { AUTH_URL } from '@/lib/config';
 
 interface User {
     username: string;
     email: string;
+    profilePicture?: string;
     roles: string[];
 }
 
@@ -26,17 +28,85 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+
+    const fetchCurrentUser = async (authToken: string) => {
+        console.log('fetchCurrentUser called with token:', authToken.substring(0, 20) + '...');
+        try {
+            const response = await fetch(`${AUTH_URL}/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                },
+            });
+            console.log('fetchCurrentUser response status:', response.status);
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('fetchCurrentUser data received:', data);
+                const userData: User = {
+                    username: data.username,
+                    email: data.email,
+                    profilePicture: data.profilePicture,
+                    roles: data.roles,
+                };
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+                console.log('fetchCurrentUser: User data saved to state and localStorage');
+                return true;
+            } else {
+                const errorText = await response.text();
+                console.error('fetchCurrentUser failed:', response.status, errorText);
+            }
+        } catch (error) {
+            console.error('Error fetching current user:', error);
+        }
+        return false;
+    };
+
+    // Component to handle URL tokens specifically
+    function AuthTokenHandler() {
+        const searchParams = useSearchParams();
+
+        useEffect(() => {
+            const handleUrlToken = async () => {
+                const urlToken = searchParams.get('token');
+                if (urlToken) {
+                    console.log('Detected token in URL, initializing OAuth session...');
+                    setToken(urlToken);
+                    localStorage.setItem('token', urlToken);
+
+                    const success = await fetchCurrentUser(urlToken);
+                    if (success) {
+                        const newUrl = window.location.pathname;
+                        window.history.replaceState({}, '', newUrl);
+                        // Force reload to ensure UI updates
+                        window.location.reload();
+                    } else {
+                        console.error('Failed to fetch current user with OAuth token');
+                    }
+                }
+            };
+            handleUrlToken();
+        }, [searchParams]);
+
+        return null;
+    }
 
     useEffect(() => {
-        // Load user from localStorage on mount
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+        const initializeAuth = async () => {
+            // Check localStorage
+            const storedToken = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
 
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
-        }
-        setIsLoading(false);
+            if (storedToken && storedUser) {
+                setToken(storedToken);
+                setUser(JSON.parse(storedUser));
+            }
+            setIsLoading(false);
+        };
+
+        initializeAuth();
     }, []);
 
     const login = async (username: string, password: string) => {
@@ -56,6 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userData: User = {
             username: data.username,
             email: data.email,
+            profilePicture: data.profilePicture,
             roles: data.roles,
         };
 
@@ -115,6 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setToken(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        window.location.reload();
     };
 
     // Auto-refresh token every 4 minutes (before it expires at 5 mins)
@@ -175,6 +247,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 isLoading,
             }}
         >
+            <Suspense fallback={null}>
+                <AuthTokenHandler />
+            </Suspense>
             {children}
         </AuthContext.Provider>
     );
