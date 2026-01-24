@@ -16,11 +16,11 @@ spring:
         - id: product-service
           uri: http://product-service:8088
           predicates:
-            - Path=/api/products/**, /api/categories/**, /uploads/**
+            - Path=/api/products/**,/api/categories/**,/uploads/**,/api/wishlist/**,/api/wishlist
         - id: order-service
           uri: http://order-service:8081
           predicates:
-            - Path=/api/orders/**, /api/orders
+            - Path=/api/orders/**,/api/orders,/api/cart/**,/api/cart
           filters:
             - AddRequestHeader=X-API-KEY, secret-api-key
         - id: inventory-service

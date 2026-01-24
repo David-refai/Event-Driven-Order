@@ -5,15 +5,35 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { apiClient, Product } from '@/lib/api';
 import { API_BASE_URL } from '@/lib/config';
-import { ArrowLeft, ShoppingCart, Shield, Truck, RefreshCw, Star, Layers, Package } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Shield, Truck, RefreshCw, Star, Layers, Package, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 
 import { useParams } from 'next/navigation';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlistQuery } from '@/hooks/useWishlistQuery';
 
 export default function ProductDetailPage() {
     const params = useParams();
     const id = params?.id as string;
+    const { addToCart } = useCart();
+    const { wishlist, addToWishlist, removeFromWishlist } = useWishlistQuery();
+
+    const isWishlisted = wishlist?.items?.some(item => item.productId === id);
+
+    const toggleWishlist = () => {
+        if (!product) return;
+        if (isWishlisted) {
+            removeFromWishlist(id);
+        } else {
+            addToWishlist({
+                productId: product.id,
+                productName: product.name,
+                productImage: product.images && product.images.length > 0 ? product.images[0] : '',
+                price: product.price
+            });
+        }
+    };
 
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
@@ -167,6 +187,7 @@ export default function ProductDetailPage() {
                             {/* Actions */}
                             <div className="flex flex-col sm:flex-row gap-4 mb-12">
                                 <Button
+                                    onClick={() => product && addToCart(product)}
                                     disabled={isOutOfStock}
                                     className="h-16 px-12 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-500 text-white rounded-[24px] font-black text-lg shadow-2xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase tracking-tight flex-1"
                                 >
@@ -175,9 +196,13 @@ export default function ProductDetailPage() {
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    className="h-16 w-16 bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-[24px] flex items-center justify-center p-0"
+                                    onClick={toggleWishlist}
+                                    className={`h-16 w-16 border-white/10 hover:bg-white/10 rounded-[24px] flex items-center justify-center p-0 ${isWishlisted
+                                        ? 'bg-rose-500/10 border-rose-500/20 text-rose-500 hover:text-rose-500'
+                                        : 'bg-white/5 text-gray-400 hover:text-white'
+                                        }`}
                                 >
-                                    <Star className="w-6 h-6 text-gray-400 hover:text-yellow-400 transition-colors" />
+                                    <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-rose-500' : ''}`} />
                                 </Button>
                             </div>
 
@@ -201,7 +226,6 @@ export default function ProductDetailPage() {
                     </div>
                 </div>
             </div>
-            <Footer />
         </main>
     );
 }

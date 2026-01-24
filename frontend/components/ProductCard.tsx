@@ -2,10 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/lib/api';
-import { ShoppingCart, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, ChevronRight, Heart, Star } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlistQuery } from '@/hooks/useWishlistQuery';
 import Link from 'next/link';
 
 export default function ProductCard({ product }: { product: Product }) {
+    const { addToCart } = useCart();
+    const { wishlist, addToWishlist, removeFromWishlist } = useWishlistQuery();
+
+    // Check if item is in wishlist
+    const isWishlisted = wishlist?.items?.some(item => item.productId === product.id);
+
+    const toggleWishlist = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isWishlisted) {
+            removeFromWishlist(product.id);
+        } else {
+            addToWishlist({
+                productId: product.id,
+                productName: product.name,
+                productImage: product.images && product.images.length > 0 ? product.images[0] : '',
+                price: product.price
+            });
+        }
+    };
+
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const images = product.images && product.images.length > 0 ? product.images : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'];
 
@@ -108,12 +131,25 @@ export default function ProductCard({ product }: { product: Product }) {
                 </p>
 
                 <div className="flex items-center gap-3">
-                    <button className="flex-1 bg-white text-black h-12 rounded-2xl font-bold text-sm hover:bg-blue-500 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            addToCart(product);
+                        }}
+                        className="flex-1 bg-white text-black h-12 rounded-2xl font-bold text-sm hover:bg-blue-500 hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2"
+                    >
                         <ShoppingCart className="w-4 h-4" />
                         Add to Cart
                     </button>
-                    <button className="w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/5 transition-all">
-                        <Star className="w-5 h-5" />
+                    <button
+                        onClick={toggleWishlist}
+                        className={`w-12 h-12 rounded-2xl border border-white/10 flex items-center justify-center transition-all ${isWishlisted
+                            ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                            }`}
+                    >
+                        <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-rose-500' : ''}`} />
                     </button>
                 </div>
             </div>

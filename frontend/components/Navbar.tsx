@@ -2,11 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ShoppingCart, User, LogIn, ChevronDown, Package, Zap, Globe, Shield, MessageCircle } from 'lucide-react';
+import { ShoppingCart, User, LogIn, ChevronDown, Package, Zap, Globe, Shield, MessageCircle, Heart } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWishlistQuery } from '@/hooks/useWishlistQuery';
 
 export default function Navbar() {
     const { user, logout, isLoading } = useAuth();
+    const { totalItems } = useCart();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
 
@@ -38,6 +41,9 @@ export default function Navbar() {
             ]
         }
     ];
+
+    const { wishlist } = useWishlistQuery();
+    const wishlistCount = wishlist?.items?.length || 0;
 
     return (
         <nav className={`fixed top-0 left-0 w-full z-50 transition-colors duration-500
@@ -106,12 +112,22 @@ export default function Navbar() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-6 min-w-[120px] justify-end">
-                    <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+                    <Link href="/wishlist" className="relative p-2 text-gray-400 hover:text-rose-500 transition-colors">
+                        <Heart className="w-5 h-5" />
+                        {wishlistCount > 0 && (
+                            <span className="absolute top-0 right-0 w-4 h-4 bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-gray-950">
+                                {wishlistCount}
+                            </span>
+                        )}
+                    </Link>
+                    <Link href="/cart" className="relative p-2 text-gray-400 hover:text-white transition-colors">
                         <ShoppingCart className="w-5 h-5" />
-                        <span className="absolute top-0 right-0 w-4 h-4 bg-blue-600 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-gray-950">
-                            0
-                        </span>
-                    </button>
+                        {totalItems > 0 && (
+                            <span className="absolute top-0 right-0 w-4 h-4 bg-blue-600 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-gray-950">
+                                {totalItems}
+                            </span>
+                        )}
+                    </Link>
 
                     <div className="min-w-[220px] flex justify-end">
                         {isLoading ? (

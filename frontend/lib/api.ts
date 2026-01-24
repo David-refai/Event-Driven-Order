@@ -36,6 +36,35 @@ export interface HealthStatus {
     status: 'UP' | 'DOWN' | 'UNKNOWN';
 }
 
+export interface CartItem {
+    id: number;
+    productId: string;
+    productName: string;
+    productImage: string;
+    price: number;
+    quantity: number;
+}
+
+export interface Cart {
+    id: number;
+    userId: string;
+    items: CartItem[];
+}
+
+export interface WishlistItem {
+    id: number;
+    productId: string;
+    productName: string;
+    productImage: string;
+    price: number;
+}
+
+export interface Wishlist {
+    id: number;
+    userId: string;
+    items: WishlistItem[];
+}
+
 const getAuthHeaders = (isMultipart = false): HeadersInit => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     const headers: Record<string, string> = {
@@ -158,6 +187,88 @@ export const apiClient = {
             credentials: 'include',
         });
         if (!res.ok) throw new Error('Failed to create category');
+        return res.json();
+    },
+
+    // Cart APIs
+    async getCart(): Promise<Cart> {
+        const res = await fetch(`${API_BASE_URL}/api/cart`, {
+            headers: getAuthHeaders(),
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('Failed to fetch cart');
+        return res.json();
+    },
+
+    async addToCart(item: { productId: string; productName: string; productImage: string; price: number; quantity: number }): Promise<Cart> {
+        const res = await fetch(`${API_BASE_URL}/api/cart/items`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(item),
+            credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to add to cart');
+        return res.json();
+    },
+
+    async updateCartItem(productId: string, quantity: number): Promise<Cart> {
+        const res = await fetch(`${API_BASE_URL}/api/cart/items/${productId}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ quantity }),
+            credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to update cart item');
+        return res.json();
+    },
+
+    async removeCartItem(productId: string): Promise<Cart> {
+        const res = await fetch(`${API_BASE_URL}/api/cart/items/${productId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+            credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to remove cart item');
+        return res.json();
+    },
+
+    async clearCart(): Promise<void> {
+        const res = await fetch(`${API_BASE_URL}/api/cart`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+            credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to clear cart');
+    },
+
+    // Wishlist APIs
+    async getWishlist(): Promise<Wishlist> {
+        const res = await fetch(`${API_BASE_URL}/api/wishlist`, {
+            headers: getAuthHeaders(),
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error('Failed to fetch wishlist');
+        return res.json();
+    },
+
+    async addToWishlist(item: { productId: string; productName: string; productImage: string; price: number }): Promise<Wishlist> {
+        const res = await fetch(`${API_BASE_URL}/api/wishlist/items`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify(item),
+            credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to add to wishlist');
+        return res.json();
+    },
+
+    async removeFromWishlist(productId: string): Promise<Wishlist> {
+        const res = await fetch(`${API_BASE_URL}/api/wishlist/items/${productId}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+            credentials: 'include',
+        });
+        if (!res.ok) throw new Error('Failed to remove from wishlist');
         return res.json();
     }
 };

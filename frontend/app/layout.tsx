@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -19,13 +19,13 @@ export default function RootLayout({
       <body
         className={`antialiased min-h-screen bg-gray-950 flex flex-col selection:bg-blue-500/30 selection:text-blue-200`}
       >
-        <AuthProvider>
+        <Providers>
           <Navbar />
           <main className="flex-1 pt-24">
             {children}
           </main>
           <Footer />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
