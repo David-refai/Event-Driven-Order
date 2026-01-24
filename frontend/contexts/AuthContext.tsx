@@ -81,16 +81,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 if (urlToken && isOAuthCallback) {
                     console.log('Detected OAuth token in URL, initializing session...');
+
+                    // Save token to localStorage first
+                    localStorage.setItem('token', urlToken);
                     setToken(urlToken);
 
+                    // Fetch user data
                     const success = await fetchCurrentUser(urlToken);
                     if (success) {
-                        // Only save to localStorage if it's a valid JWT token (OAuth)
-                        localStorage.setItem('token', urlToken);
+                        console.log('OAuth login successful, user data loaded');
+                        // Clean up URL without reload
                         const newUrl = window.location.pathname;
                         window.history.replaceState({}, '', newUrl);
-                        // Force reload to ensure UI updates
-                        window.location.reload();
                     } else {
                         console.error('Failed to fetch current user with OAuth token');
                         setToken(null);
@@ -98,6 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     }
                 }
             };
+
             handleUrlToken();
         }, [searchParams]);
 

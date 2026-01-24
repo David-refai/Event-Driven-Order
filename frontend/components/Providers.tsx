@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { StatusProvider } from '@/contexts/StatusContext';
+import { ToastProvider } from '@/components/ToastProvider';
 
 import { AuthModalProvider } from '@/contexts/AuthModalContext';
 
@@ -24,6 +25,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 <AuthModalProvider>
                     <CartProvider>
                         <StatusProvider>
+                            <ToastProvider />
                             {children}
                         </StatusProvider>
                     </CartProvider>

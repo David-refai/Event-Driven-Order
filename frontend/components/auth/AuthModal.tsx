@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useAuthModal } from '@/contexts/AuthModalContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,6 @@ export default function AuthModal() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -31,8 +30,6 @@ export default function AuthModal() {
 
     // Reset state when modal opens/closes or mode changes
     useEffect(() => {
-        setError('');
-        setSuccess('');
         setUsername('');
         setEmail('');
         setPassword('');
@@ -43,14 +40,14 @@ export default function AuthModal() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
         setIsLoading(true);
         try {
             await login(username, password);
+            toast.success('Welcome back! Login successful.');
             closeModal();
             router.refresh();
-        } catch (err) {
-            setError('Invalid credentials. Please check your username and password.');
+        } catch (err: any) {
+            toast.error(err.message || 'Login failed. Please check your credentials.');
         } finally {
             setIsLoading(false);
         }
@@ -58,38 +55,37 @@ export default function AuthModal() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
 
         // Validation
         if (username.length < 3) {
-            setError('Username must be at least 3 characters long');
+            toast.error('Username must be at least 3 characters long');
             return;
         }
 
         // Email validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            setError('Please enter a valid email address');
+            toast.error('Please enter a valid email address');
             return;
         }
 
         if (password.length < 6) {
-            setError('Password must be at least 6 characters long');
+            toast.error('Password must be at least 6 characters long');
             return;
         }
 
         if (password !== confirmPassword) {
-            setError('Passwords do not match');
+            toast.error('Passwords do not match');
             return;
         }
 
         setIsLoading(true);
         try {
             await register(username, email, password);
-            setSuccess('Account created! Please check your email to verify.');
+            toast.success('Account created! Please check your email to verify.');
             setTimeout(() => setMode('login'), 3000);
         } catch (err: any) {
-            setError(err.message || 'Registration failed.');
+            toast.error(err.message || 'Registration failed.');
         } finally {
             setIsLoading(false);
         }
@@ -211,20 +207,6 @@ export default function AuthModal() {
                                         required
                                     />
                                 </div>
-                            </div>
-                        )}
-
-                        {error && (
-                            <div className="flex items-center gap-2 p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl animate-in fade-in slide-in-from-top-2">
-                                <ShieldCheck className="w-4 h-4 flex-shrink-0" />
-                                {error}
-                            </div>
-                        )}
-
-                        {success && (
-                            <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-xl animate-in fade-in slide-in-from-top-2">
-                                <Info className="w-4 h-4 flex-shrink-0" />
-                                {success}
                             </div>
                         )}
 

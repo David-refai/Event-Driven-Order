@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { Lock, Bell, Shield, Eye, EyeOff, Trash2, Save, Mail, Globe, Moon, Sun, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lock, Bell, Shield, Eye, EyeOff, Trash2, Save, Mail, Globe, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -13,7 +14,6 @@ export default function SettingsPage() {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     const [passwordForm, setPasswordForm] = useState({
         currentPassword: '',
@@ -47,24 +47,22 @@ export default function SettingsPage() {
 
     const handlePasswordChange = async () => {
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            setMessage({ type: 'error', text: 'New passwords do not match!' });
+            toast.error('New passwords do not match!');
             return;
         }
 
         if (passwordForm.newPassword.length < 6) {
-            setMessage({ type: 'error', text: 'Password must be at least 6 characters!' });
+            toast.error('Password must be at least 6 characters!');
             return;
         }
 
         setLoading(true);
-        setMessage(null);
         try {
             await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
-            setMessage({ type: 'success', text: 'Password changed successfully!' });
+            toast.success('Password changed successfully!');
             setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-            setTimeout(() => setMessage(null), 3000);
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.message || 'Failed to change password' });
+            toast.error(error.message || 'Failed to change password');
         } finally {
             setLoading(false);
         }
@@ -72,7 +70,6 @@ export default function SettingsPage() {
 
     const handleSavePreferences = async () => {
         setLoading(true);
-        setMessage(null);
         try {
             await updatePreferences({
                 language: preferences.language,
@@ -80,10 +77,9 @@ export default function SettingsPage() {
                 currency: preferences.currency,
                 notifications: notifications,
             });
-            setMessage({ type: 'success', text: 'Preferences saved successfully!' });
-            setTimeout(() => setMessage(null), 3000);
+            toast.success('Preferences saved successfully!');
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.message || 'Failed to save preferences' });
+            toast.error(error.message || 'Failed to save preferences');
         } finally {
             setLoading(false);
         }
@@ -95,12 +91,11 @@ export default function SettingsPage() {
         }
 
         setLoading(true);
-        setMessage(null);
         try {
             await deleteAccount();
             router.push('/');
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.message || 'Failed to delete account' });
+            toast.error(error.message || 'Failed to delete account');
             setLoading(false);
         }
     };
@@ -121,21 +116,6 @@ export default function SettingsPage() {
                     <p className="text-gray-400">Manage your account settings and preferences</p>
                 </div>
 
-                {/* Success/Error Message */}
-                {message && (
-                    <div className={`mb-6 p-4 rounded-xl border ${message.type === 'success'
-                            ? 'bg-green-600/10 border-green-600/30 text-green-400'
-                            : 'bg-rose-600/10 border-rose-600/30 text-rose-400'
-                        } flex items-center gap-3 animate-in slide-in-from-top duration-300`}>
-                        {message.type === 'success' ? (
-                            <CheckCircle className="w-5 h-5" />
-                        ) : (
-                            <AlertCircle className="w-5 h-5" />
-                        )}
-                        <span className="font-bold">{message.text}</span>
-                    </div>
-                )}
-
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     {/* Sidebar */}
                     <div className="lg:col-span-1">
@@ -147,8 +127,8 @@ export default function SettingsPage() {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === tab.id
-                                                ? 'bg-blue-600 text-white'
-                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                            ? 'bg-blue-600 text-white'
+                                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                             }`}
                                     >
                                         <Icon className="w-5 h-5" />
@@ -329,8 +309,8 @@ export default function SettingsPage() {
                                                 <button
                                                     onClick={() => setPreferences({ ...preferences, theme: 'dark' })}
                                                     className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${preferences.theme === 'dark'
-                                                            ? 'border-blue-600 bg-blue-600/10'
-                                                            : 'border-white/10 hover:border-white/20'
+                                                        ? 'border-blue-600 bg-blue-600/10'
+                                                        : 'border-white/10 hover:border-white/20'
                                                         }`}
                                                 >
                                                     <Moon className="w-5 h-5 text-blue-400" />
@@ -339,8 +319,8 @@ export default function SettingsPage() {
                                                 <button
                                                     onClick={() => setPreferences({ ...preferences, theme: 'light' })}
                                                     className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${preferences.theme === 'light'
-                                                            ? 'border-blue-600 bg-blue-600/10'
-                                                            : 'border-white/10 hover:border-white/20'
+                                                        ? 'border-blue-600 bg-blue-600/10'
+                                                        : 'border-white/10 hover:border-white/20'
                                                         }`}
                                                 >
                                                     <Sun className="w-5 h-5 text-yellow-400" />

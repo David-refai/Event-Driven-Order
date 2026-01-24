@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Mail, Calendar, Shield, Edit2, Camera, Save, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Mail, Calendar, Shield, Edit2, Camera, Save, X } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProfilePage() {
     const { user, updateProfile } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [formData, setFormData] = useState({
         username: user?.username || '',
         email: user?.email || '',
@@ -28,14 +28,12 @@ export default function ProfilePage() {
 
     const handleSave = async () => {
         setLoading(true);
-        setMessage(null);
         try {
             await updateProfile(formData.username, formData.email);
-            setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            toast.success('Profile updated successfully!');
             setIsEditing(false);
-            setTimeout(() => setMessage(null), 3000);
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+            toast.error(error.message || 'Failed to update profile');
         } finally {
             setLoading(false);
         }
@@ -47,7 +45,6 @@ export default function ProfilePage() {
             email: user.email,
         });
         setIsEditing(false);
-        setMessage(null);
     };
 
     return (
@@ -58,21 +55,6 @@ export default function ProfilePage() {
                     <h1 className="text-4xl font-black text-white mb-2">My Profile</h1>
                     <p className="text-gray-400">Manage your account information and preferences</p>
                 </div>
-
-                {/* Success/Error Message */}
-                {message && (
-                    <div className={`mb-6 p-4 rounded-xl border ${message.type === 'success'
-                            ? 'bg-green-600/10 border-green-600/30 text-green-400'
-                            : 'bg-rose-600/10 border-rose-600/30 text-rose-400'
-                        } flex items-center gap-3 animate-in slide-in-from-top duration-300`}>
-                        {message.type === 'success' ? (
-                            <CheckCircle className="w-5 h-5" />
-                        ) : (
-                            <AlertCircle className="w-5 h-5" />
-                        )}
-                        <span className="font-bold">{message.text}</span>
-                    </div>
-                )}
 
                 {/* Profile Card */}
                 <div className="bg-gray-900/50 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden">
