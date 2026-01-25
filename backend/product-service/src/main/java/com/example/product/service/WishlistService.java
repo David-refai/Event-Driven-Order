@@ -11,11 +11,14 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
+
+    public WishlistService(WishlistRepository wishlistRepository) {
+        this.wishlistRepository = wishlistRepository;
+    }
 
     public Wishlist getWishlist(String userId) {
         return wishlistRepository.findByUserId(userId)

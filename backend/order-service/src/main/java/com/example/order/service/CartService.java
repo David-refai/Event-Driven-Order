@@ -11,11 +11,14 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class CartService {
 
     private final CartRepository cartRepository;
+
+    public CartService(CartRepository cartRepository) {
+        this.cartRepository = cartRepository;
+    }
 
     public Cart getCart(String userId) {
         return cartRepository.findByUserId(userId)

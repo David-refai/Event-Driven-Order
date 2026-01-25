@@ -11,10 +11,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cart")
-@RequiredArgsConstructor
 public class CartController {
 
     private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
 
     // In a real app, get userId from Principal/SecurityContext
     // For demo, we might pass it as header or query param, or mock it?

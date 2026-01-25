@@ -11,10 +11,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/wishlist")
-@RequiredArgsConstructor
 public class WishlistController {
 
     private final WishlistService wishlistService;
+
+    public WishlistController(WishlistService wishlistService) {
+        this.wishlistService = wishlistService;
+    }
 
     // Using X-User-Id header for simplicity as discussed
     @GetMapping

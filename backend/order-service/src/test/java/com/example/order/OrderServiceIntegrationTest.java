@@ -15,14 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -35,17 +31,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers
+@ActiveProfiles("test")
+@EmbeddedKafka(partitions = 1, brokerProperties = { "listeners=PLAINTEXT://localhost:9092", "port=9092" })
 public class OrderServiceIntegrationTest {
 
-        @Container
-        static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:15"))
-                        .withDatabaseName("order_db_test")
-                        .withUsername("test")
-                        .withPassword("test");
-
-        @Container
-        static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"));
+        @Autowired
+        private EmbeddedKafkaBroker embeddedKafkaBroker;
 
         @Autowired
         private MockMvc mockMvc;
@@ -53,13 +44,11 @@ public class OrderServiceIntegrationTest {
         @Autowired
         private ObjectMapper objectMapper;
 
-        @DynamicPropertySource
-        static void configureProperties(DynamicPropertyRegistry registry) {
-                registry.add("spring.datasource.url", postgres::getJdbcUrl);
-                registry.add("spring.datasource.username", postgres::getUsername);
-                registry.add("spring.datasource.password", postgres::getPassword);
-                registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-        }
+        @Autowired
+        private com.example.order.publisher.OutboxPublisher outboxPublisher;
+
+        @Autowired
+        private com.example.order.repository.OutboxRepository outboxRepository;
 
         @Test
         @WithMockUser(username = "testuser", roles = { "USER" })
@@ -74,7 +63,7 @@ public class OrderServiceIntegrationTest {
 
                 // Create Kafka consumer to verify event publication
                 Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(
-                                kafka.getBootstrapServers(),
+                                embeddedKafkaBroker.getBrokersAsString(),
                                 "test-group",
                                 "true");
                 consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -96,6 +85,15 @@ public class OrderServiceIntegrationTest {
                                 .andReturn()
                                 .getResponse()
                                 .getContentAsString();
+
+                // Manually trigger outbox publication
+                outboxPublisher.publishEvents();
+
+                outboxRepository.findAll().forEach(o -> System.out
+                                .println("Outbox event after: " + o.getEventType() + " sent: " + o.isSent()));
+
+                // Wait for Kafka to process the message
+                Thread.sleep(2000);
 
                 String orderId = objectMapper.readTree(result).get("orderId").asText();
 
