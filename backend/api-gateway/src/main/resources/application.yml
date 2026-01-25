@@ -15,6 +15,10 @@ spring:
             - Path=/auth/**, /users/**
           filters:
             - PreserveHostHeader
+        - id: auth-service-uploads
+          uri: http://auth-service:8086
+          predicates:
+            - Path=/uploads/profiles/**
         - id: product-service
           uri: http://product-service:8088
           predicates:

@@ -32,7 +32,7 @@ public class AuthController {
             JwtResponse jwtResponse = authService.authenticateUser(request);
 
             org.springframework.http.ResponseCookie cookie = org.springframework.http.ResponseCookie
-                    .from("refreshToken", jwtResponse.refreshToken())
+                    .from("refreshToken", jwtResponse.getRefreshToken())
                     .httpOnly(true)
                     .secure(false) // Set to true in production with HTTPS
                     .path("/auth")
@@ -130,6 +130,7 @@ public class AuthController {
     public ResponseEntity<?> getCurrentUser() {
         try {
             JwtResponse user = authService.getCurrentUser();
+            System.out.println("AuthController returning user: " + user.getUsername() + " with ID: " + user.getId());
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

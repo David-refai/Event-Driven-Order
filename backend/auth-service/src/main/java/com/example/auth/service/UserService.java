@@ -18,10 +18,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final FileStorageService fileStorageService;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository,
+            FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     public List<UserDTO> getAllUsers() {
@@ -58,10 +61,26 @@ public class UserService {
         return convertToDTO(userRepository.save(user));
     }
 
+    @Transactional
+    public UserDTO updateProfilePicture(Long userId, org.springframework.web.multipart.MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String fileName = fileStorageService.storeFile(file);
+
+        // Construct the full URL for the image
+        // Assuming uploads are served from /uploads/profiles/
+        // We'll configure WebMvcConfig to serve this path
+        String fileUrl = "/uploads/profiles/" + fileName;
+
+        user.setProfilePicture(fileUrl);
+        return convertToDTO(userRepository.save(user));
+    }
+
     private UserDTO convertToDTO(User user) {
         List<String> roles = user.getRoles().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toList());
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), roles);
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getProfilePicture(), roles);
     }
 }

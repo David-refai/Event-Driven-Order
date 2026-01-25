@@ -3,8 +3,11 @@
 import React, { createContext, useContext, useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { AUTH_URL } from '@/lib/config';
+import { toast } from 'sonner';
+
 
 interface User {
+    id: number;
     username: string;
     email: string;
     profilePicture?: string;
@@ -19,6 +22,7 @@ interface AuthContextType {
     logout: () => void;
     refreshToken: () => Promise<void>;
     updateProfile: (username: string, email: string, profilePicture?: string) => Promise<User>;
+    uploadProfilePicture: (file: File) => Promise<User>;
     changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
     updatePreferences: (preferences: any) => Promise<void>;
     deleteAccount: () => Promise<void>;
@@ -49,13 +53,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('fetchCurrentUser data received:', data);
+                console.log('fetchCurrentUser: Full response data:', data);
+
+                // Fallback for ID mapping just in case
+                const userId = data.id !== undefined ? data.id : data.userId;
+
                 const userData: User = {
+                    id: userId,
                     username: data.username,
                     email: data.email,
                     profilePicture: data.profilePicture,
                     roles: data.roles,
                 };
+                console.log('fetchCurrentUser: Created userData object:', userData);
                 setUser(userData);
                 localStorage.setItem('user', JSON.stringify(userData));
                 console.log('fetchCurrentUser: User data saved to state and localStorage');
@@ -110,13 +120,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         const initializeAuth = async () => {
-            // Check localStorage
             const storedToken = localStorage.getItem('token');
-            const storedUser = localStorage.getItem('user');
-
-            if (storedToken && storedUser) {
+            if (storedToken) {
                 setToken(storedToken);
-                setUser(JSON.parse(storedUser));
+                // Fetch fresh user data to ensure ID and other fields are present
+                const success = await fetchCurrentUser(storedToken);
+                if (!success) {
+                    console.warn('Initial auth fetch failed, clearing state');
+                    logout();
+                }
             }
             setIsLoading(false);
         };
@@ -139,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
 
         const userData: User = {
+            id: data.id,
             username: data.username,
             email: data.email,
             profilePicture: data.profilePicture,
@@ -264,7 +277,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const data = await response.json();
+        console.log('updateProfile: Full response data:', data);
         const userData: User = {
+            id: data.id,
+            username: data.username,
+            email: data.email,
+            profilePicture: data.profilePicture,
+            roles: data.roles,
+        };
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        return userData;
+    };
+
+    const uploadProfilePicture = async (file: File): Promise<User> => {
+        if (!user || !user.id) {
+            console.error('Upload failed: user or user.id is missing', user);
+            throw new Error('User identity not found. Please try logging in again.');
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${AUTH_URL}/users/${user.id}/picture`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to upload profile picture');
+        }
+
+        const data = await response.json();
+        const userData: User = {
+            id: data.id,
             username: data.username,
             email: data.email,
             profilePicture: data.profilePicture,
@@ -333,6 +383,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 logout,
                 refreshToken,
                 updateProfile,
+                uploadProfilePicture,
                 changePassword,
                 updatePreferences,
                 deleteAccount,

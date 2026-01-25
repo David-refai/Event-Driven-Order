@@ -137,7 +137,7 @@ public class AuthService {
                 com.example.auth.entity.RefreshToken refreshToken = refreshTokenService
                                 .createRefreshToken(user.getUsername());
 
-                return new JwtResponse(jwt, refreshToken.getToken(), user.getUsername(), user.getEmail(),
+                return new JwtResponse(jwt, user.getId(), refreshToken.getToken(), user.getUsername(), user.getEmail(),
                                 user.getProfilePicture(), roles);
         }
 
@@ -202,8 +202,14 @@ public class AuthService {
                                 .collect(Collectors.toList());
 
                 System.out.println("AuthService: User roles: " + roles);
+                System.out.println("AuthService: User ID from database: " + user.getId());
 
-                return new JwtResponse("", "", user.getUsername(), user.getEmail(), user.getProfilePicture(), roles);
+                if (user.getId() == null) {
+                        System.err.println("AuthService: ERROR! User ID is NULL for user: " + username);
+                }
+
+                return new JwtResponse("", user.getId(), "", user.getUsername(), user.getEmail(),
+                                user.getProfilePicture(), roles);
         }
 
         public JwtResponse updateProfile(com.example.auth.dto.UpdateProfileRequest request) {
@@ -239,7 +245,8 @@ public class AuthService {
                                 .map(role -> role.getName().name())
                                 .collect(Collectors.toList());
 
-                return new JwtResponse("", "", user.getUsername(), user.getEmail(), user.getProfilePicture(), roles);
+                return new JwtResponse("", user.getId(), "", user.getUsername(), user.getEmail(),
+                                user.getProfilePicture(), roles);
         }
 
         public void changePassword(com.example.auth.dto.ChangePasswordRequest request) {

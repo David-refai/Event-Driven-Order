@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, Mail, Calendar, Shield, Edit2, Camera, Save, X } from 'lucide-react';
 import Link from 'next/link';
+import { ImageUpload } from '@/components/profile/ImageUpload';
 
 export default function ProfilePage() {
     const { user, updateProfile } = useAuth();
@@ -67,22 +68,10 @@ export default function ProfilePage() {
                     <div className="px-8 pb-8">
                         {/* Avatar */}
                         <div className="relative -mt-20 mb-6">
-                            <div className="relative inline-block">
-                                {user.profilePicture ? (
-                                    <img
-                                        src={user.profilePicture}
-                                        alt={user.username}
-                                        className="w-32 h-32 rounded-full border-4 border-gray-900 object-cover shadow-2xl"
-                                    />
-                                ) : (
-                                    <div className="w-32 h-32 rounded-full border-4 border-gray-900 bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-2xl">
-                                        <User className="w-16 h-16 text-white" />
-                                    </div>
-                                )}
-                                <button className="absolute bottom-2 right-2 w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors shadow-lg">
-                                    <Camera className="w-5 h-5 text-white" />
-                                </button>
-                            </div>
+                            <ImageUpload
+                                currentImage={user.profilePicture}
+                                username={user.username}
+                            />
                         </div>
 
                         {/* Edit Button */}
