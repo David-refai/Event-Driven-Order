@@ -101,7 +101,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         System.out.println("Generated JWT token for OAuth2 user: " + user.getUsername());
 
         // Redirect to frontend with token and oauth=true parameter
-        String redirectUrl = String.format("http://localhost:3000?token=%s&oauth=true", jwtToken);
+        String redirectUrl = String.format("http://localhost:3000/?token=%s&oauth=true", jwtToken);
         System.out.println("Redirecting to: " + redirectUrl);
         response.sendRedirect(redirectUrl);
     }

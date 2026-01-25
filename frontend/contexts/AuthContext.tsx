@@ -75,11 +75,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const searchParams = useSearchParams();
 
         useEffect(() => {
+            console.log('AuthTokenHandler useEffect triggered');
+            console.log('URL search params:', window.location.search);
+
             // Only handle OAuth tokens that come with a specific parameter
             // Verification tokens should NOT be saved to localStorage
             const handleUrlToken = async () => {
                 const urlToken = searchParams.get('token');
                 const isOAuthCallback = searchParams.get('oauth') === 'true';
+
+                console.log('Token from URL:', urlToken ? 'present' : 'missing');
+                console.log('OAuth flag:', isOAuthCallback);
 
                 if (urlToken && isOAuthCallback) {
                     console.log('Detected OAuth token in URL, initializing session...');
@@ -87,8 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     // Save token to localStorage first
                     localStorage.setItem('token', urlToken);
                     setToken(urlToken);
+                    console.log('Token saved to localStorage and state');
 
                     // Fetch user data
+                    console.log('Calling fetchCurrentUser...');
                     const success = await fetchCurrentUser(urlToken);
                     if (success) {
                         console.log('OAuth login successful, user data loaded');
