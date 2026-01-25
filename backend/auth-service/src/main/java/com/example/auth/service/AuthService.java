@@ -234,9 +234,9 @@ public class AuthService {
                         user.setEmail(request.email());
                 }
 
-                if (request.profilePicture() != null) {
-                        user.setProfilePicture(request.profilePicture());
-                }
+                // Profile picture updates should be done via UserService.updateProfilePicture()
+                // endpoint
+                // which handles file uploads properly
 
                 userRepository.save(user);
                 System.out.println("Profile updated for user: " + user.getUsername());

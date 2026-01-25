@@ -63,6 +63,19 @@ public class UserService {
 
     @Transactional
     public UserDTO updateProfilePicture(Long userId, org.springframework.web.multipart.MultipartFile file) {
+        // Get the currently authenticated user
+        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        // Security check: ensure user can only update their own profile picture
+        if (!currentUser.getId().equals(userId)) {
+            throw new RuntimeException("You can only update your own profile picture");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

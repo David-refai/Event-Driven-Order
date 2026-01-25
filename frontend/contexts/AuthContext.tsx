@@ -21,7 +21,7 @@ interface AuthContextType {
     register: (username: string, email: string, password: string) => Promise<void>;
     logout: () => void;
     refreshToken: () => Promise<void>;
-    updateProfile: (username: string, email: string, profilePicture?: string) => Promise<User>;
+    updateProfile: (username: string, email: string) => Promise<User>;
     uploadProfilePicture: (file: File) => Promise<User>;
     changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
     updatePreferences: (preferences: any) => Promise<void>;
@@ -261,14 +261,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, [token]);
 
-    const updateProfile = async (username: string, email: string, profilePicture?: string): Promise<User> => {
+    const updateProfile = async (username: string, email: string): Promise<User> => {
         const response = await fetch(`${AUTH_URL}/auth/profile`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ username, email, profilePicture }),
+            body: JSON.stringify({ username, email }),
         });
 
         if (!response.ok) {

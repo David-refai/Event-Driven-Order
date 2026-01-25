@@ -39,9 +39,8 @@ public class UserController {
     }
 
     @PostMapping("/{id}/picture")
-    @PreAuthorize("isAuthenticated()") // Any authenticated user can upload (we should check if it's their own profile
-                                       // ideally, but let's stick to simple auth for now or use
-                                       // @PreAuthorize("@userSecurity.hasUserId(authentication, #id)"))
+    @PreAuthorize("isAuthenticated()") // Security check in service layer ensures users can only update their own
+                                       // profile
     public ResponseEntity<UserDTO> uploadProfilePicture(@PathVariable Long id,
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
         return ResponseEntity.ok(userService.updateProfilePicture(id, file));

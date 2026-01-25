@@ -55,12 +55,22 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         if (userOptional.isPresent()) {
             user = userOptional.get();
             System.out.println("Existing user found for OAuth2 email: " + user.getUsername());
-            // Update profile picture if available
-            if (picture != null && !picture.isEmpty()) {
+
+            // Only update profile picture from Google if user doesn't have a custom
+            // uploaded picture
+            // Custom pictures start with /uploads/, Google pictures are full URLs
+            // (https://)
+            String currentPicture = user.getProfilePicture();
+            boolean hasCustomPicture = currentPicture != null && currentPicture.startsWith("/uploads/");
+
+            if (!hasCustomPicture && picture != null && !picture.isEmpty()) {
                 user.setProfilePicture(picture);
                 userRepository.save(user);
-                System.out.println("Updated profile picture for user: " + user.getUsername());
+                System.out.println("Updated profile picture from Google for user: " + user.getUsername());
+            } else if (hasCustomPicture) {
+                System.out.println("User has custom uploaded picture, keeping it: " + currentPicture);
             }
+
             // Ensure existing users have roles, assign ROLE_USER if missing
             if (user.getRoles() == null || user.getRoles().isEmpty()) {
                 Role userRole = roleRepository.findByName(Role.RoleName.ROLE_USER)
