@@ -34,14 +34,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    const fetchCurrentUser = async (authToken: string) => {
-        console.log('fetchCurrentUser called with token:', authToken.substring(0, 20) + '...');
+    const fetchCurrentUser = async (authToken: string): Promise<boolean> => {
+        console.log('fetchCurrentUser called with token:', authToken ? 'present' : 'missing');
         try {
             const response = await fetch(`${AUTH_URL}/auth/me`, {
+                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
+                credentials: 'include',
             });
             console.log('fetchCurrentUser response status:', response.status);
 
