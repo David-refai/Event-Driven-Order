@@ -8,6 +8,7 @@ import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Package } from 'lucide-re
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from '@/lib/config';
+import { getImageUrl } from '@/lib/utils';
 
 export default function CartPage() {
     const { items, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
@@ -56,9 +57,7 @@ export default function CartPage() {
                                     {/* Image */}
                                     <div className="w-full sm:w-32 h-32 bg-white/5 rounded-2xl overflow-hidden flex-shrink-0 border border-white/5">
                                         <img
-                                            src={item.productImage && item.productImage.startsWith('http')
-                                                ? item.productImage
-                                                : `${API_BASE_URL}${item.productImage || ''}`}
+                                            src={getImageUrl(item.productImage)}
                                             alt={item.productName}
                                             className="w-full h-full object-cover"
                                         />

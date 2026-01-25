@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { Camera, Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { getImageUrl } from '@/lib/utils';
 
 interface ImageUploadProps {
     currentImage?: string;
@@ -72,7 +73,7 @@ export function ImageUpload({ currentImage, username }: ImageUploadProps) {
                     />
                 ) : currentImage ? (
                     <img
-                        src={currentImage}
+                        src={getImageUrl(currentImage)}
                         alt={username}
                         className="w-32 h-32 rounded-full border-4 border-gray-900 object-cover shadow-2xl"
                     />

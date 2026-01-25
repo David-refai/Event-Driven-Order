@@ -9,6 +9,7 @@ import { useWishlistQuery } from '@/hooks/useWishlistQuery';
 
 import { useServiceState } from '@/contexts/StatusContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
+import { getImageUrl } from '@/lib/utils';
 
 export default function Navbar() {
     const { user, logout, isLoading } = useAuth();
@@ -164,7 +165,7 @@ export default function Navbar() {
                                         {wishlist?.items?.length ? wishlist.items.map((item) => (
                                             <Link key={item.productId} href={`/products/${item.productId}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors group">
                                                 <div className="w-12 h-12 rounded-lg bg-gray-800 overflow-hidden flex-shrink-0">
-                                                    {item.productImage && <img src={item.productImage.startsWith('http') ? item.productImage : `http://localhost:8000${item.productImage}`} alt="" className="w-full h-full object-cover" />}
+                                                    {item.productImage && <img src={getImageUrl(item.productImage)} alt="" className="w-full h-full object-cover" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-xs font-bold text-white truncate group-hover:text-rose-400">{item.productName}</p>
@@ -205,7 +206,7 @@ export default function Navbar() {
                                     <div className="flex items-center gap-3 cursor-pointer group pl-4 border-l border-white/10">
                                         {user.profilePicture ? (
                                             <img
-                                                src={user.profilePicture}
+                                                src={getImageUrl(user.profilePicture)}
                                                 alt={user.username}
                                                 className="w-10 h-10 rounded-full border-2 border-white/10 group-hover:scale-105 transition-transform shadow-lg object-cover"
                                             />
@@ -280,13 +281,20 @@ export default function Navbar() {
                 {/* Content */}
                 <div className={`absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-gray-900 border-l border-white/10 shadow-2xl transition-transform duration-500 ease-out ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                     <div className="h-full flex flex-col pt-24 pb-8 px-6 overflow-y-auto">
-                        {/* User Section (Mobile) */}
                         {user ? (
                             <div className="mb-8 p-6 bg-white/5 rounded-[32px] border border-white/5">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl">
-                                        {user.username.charAt(0).toUpperCase()}
-                                    </div>
+                                    {user.profilePicture ? (
+                                        <img
+                                            src={getImageUrl(user.profilePicture)}
+                                            alt={user.username}
+                                            className="w-12 h-12 rounded-2xl border-2 border-white/10 shadow-lg object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/20">
+                                            {user.username.charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
                                     <div className="min-w-0">
                                         <p className="text-lg font-bold text-white truncate">{user.username}</p>
                                         <p className="text-xs text-gray-500 truncate lowercase">{user.email}</p>

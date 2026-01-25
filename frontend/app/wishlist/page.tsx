@@ -9,6 +9,7 @@ import { Trash2, ShoppingCart, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from '@/lib/config';
+import { getImageUrl } from '@/lib/utils';
 
 export default function WishlistPage() {
     const { wishlist, removeFromWishlist } = useWishlistQuery();
@@ -64,7 +65,7 @@ export default function WishlistPage() {
                                 {/* Image */}
                                 <div className="aspect-[4/5] relative overflow-hidden bg-gray-900">
                                     <img
-                                        src={item.productImage && (item.productImage.startsWith('http') ? item.productImage : `${API_BASE_URL}${item.productImage}`)}
+                                        src={getImageUrl(item.productImage)}
                                         alt={item.productName}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />

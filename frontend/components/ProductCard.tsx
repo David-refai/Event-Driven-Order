@@ -5,6 +5,7 @@ import { Product } from '@/lib/api';
 import { ShoppingCart, ChevronLeft, ChevronRight, Heart, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlistQuery } from '@/hooks/useWishlistQuery';
+import { getImageUrl } from '@/lib/utils';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -73,7 +74,7 @@ export default function ProductCard({ product }: { product: Product }) {
                     {images.map((img, idx) => (
                         <img
                             key={idx}
-                            src={img.startsWith('http') ? img : `http://localhost:8000${img}`}
+                            src={getImageUrl(img)}
                             alt={product.name}
                             className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${idx === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                                 }`}

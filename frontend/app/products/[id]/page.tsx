@@ -8,6 +8,7 @@ import { API_BASE_URL } from '@/lib/config';
 import { ArrowLeft, ShoppingCart, Shield, Truck, RefreshCw, Star, Layers, Package, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
+import { getImageUrl } from '@/lib/utils';
 
 import { useParams } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
@@ -119,7 +120,7 @@ export default function ProductDetailPage() {
                             <div className="aspect-square w-full bg-white/5 rounded-[40px] border border-white/10 overflow-hidden relative group">
                                 {selectedImage ? (
                                     <img
-                                        src={selectedImage.startsWith('http') ? selectedImage : `${API_BASE_URL}${selectedImage}`}
+                                        src={getImageUrl(selectedImage)}
                                         alt={product.name}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
@@ -148,7 +149,7 @@ export default function ProductDetailPage() {
                                                 }`}
                                         >
                                             <img
-                                                src={img.startsWith('http') ? img : `${API_BASE_URL}${img}`}
+                                                src={getImageUrl(img)}
                                                 alt=""
                                                 className="w-full h-full object-cover"
                                             />

@@ -23,6 +23,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
             dirName = dirName.replace("../", "");
 
         registry.addResourceHandler("/" + dirName + "/**")
-                .addResourceLocations("file:" + uploadPath + "/");
+                .addResourceLocations("file:///" + uploadPath + "/")
+                .setCachePeriod(3600);
     }
 }

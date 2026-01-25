@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     id: userId,
                     username: data.username,
                     email: data.email,
-                    profilePicture: data.profilePicture,
+                    profilePicture: data.profilePicture ? (data.profilePicture.startsWith('http') || data.profilePicture.startsWith('data:') ? data.profilePicture : `${AUTH_URL}${data.profilePicture.startsWith('/') ? '' : '/'}${data.profilePicture}`) : undefined,
                     roles: data.roles,
                 };
                 console.log('fetchCurrentUser: Created userData object:', userData);
@@ -154,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: data.id,
             username: data.username,
             email: data.email,
-            profilePicture: data.profilePicture,
+            profilePicture: data.profilePicture ? (data.profilePicture.startsWith('http') || data.profilePicture.startsWith('data:') ? data.profilePicture : `${AUTH_URL}${data.profilePicture.startsWith('/') ? '' : '/'}${data.profilePicture}`) : undefined,
             roles: data.roles,
         };
 
@@ -282,7 +282,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: data.id,
             username: data.username,
             email: data.email,
-            profilePicture: data.profilePicture,
+            profilePicture: data.profilePicture ? (data.profilePicture.startsWith('http') || data.profilePicture.startsWith('data:') ? data.profilePicture : `${AUTH_URL}${data.profilePicture.startsWith('/') ? '' : '/'}${data.profilePicture}`) : undefined,
             roles: data.roles,
         };
         setUser(userData);
@@ -317,7 +317,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: data.id,
             username: data.username,
             email: data.email,
-            profilePicture: data.profilePicture,
+            profilePicture: data.profilePicture ? (data.profilePicture.startsWith('http') || data.profilePicture.startsWith('data:') ? data.profilePicture : `${AUTH_URL}${data.profilePicture.startsWith('/') ? '' : '/'}${data.profilePicture}`) : undefined,
             roles: data.roles,
         };
         setUser(userData);
