@@ -75,31 +75,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const searchParams = useSearchParams();
 
         useEffect(() => {
-            console.log('AuthTokenHandler useEffect triggered');
-            console.log('URL search params:', window.location.search);
-
             // Only handle OAuth tokens that come with a specific parameter
             // Verification tokens should NOT be saved to localStorage
             const handleUrlToken = async () => {
                 const urlToken = searchParams.get('token');
                 const isOAuthCallback = searchParams.get('oauth') === 'true';
 
-                console.log('Token from URL:', urlToken ? 'present' : 'missing');
-                console.log('OAuth flag:', isOAuthCallback);
-
                 if (urlToken && isOAuthCallback) {
-                    console.log('Detected OAuth token in URL, initializing session...');
-
                     // Save token to localStorage first
                     localStorage.setItem('token', urlToken);
                     setToken(urlToken);
-                    console.log('Token saved to localStorage and state');
 
                     // Fetch user data
-                    console.log('Calling fetchCurrentUser...');
                     const success = await fetchCurrentUser(urlToken);
                     if (success) {
-                        console.log('OAuth login successful, user data loaded');
+                        toast.success('Welcome back! login successful.');
                         // Clean up URL without reload
                         const newUrl = window.location.pathname;
                         window.history.replaceState({}, '', newUrl);
@@ -107,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         console.error('Failed to fetch current user with OAuth token');
                         setToken(null);
                         localStorage.removeItem('token');
+                        toast.error('Failed to login with Google');
                     }
                 }
             };
